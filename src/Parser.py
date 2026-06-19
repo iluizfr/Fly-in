@@ -58,46 +58,59 @@ class ParserError(Exception):
     pass
 
 
-def parser(file_name: str) -> dict:
-    valid_keys = {"nb_drones": NumericProcessor(),
+class Parser:
+    def __init__(self, file_name: str) -> None:
+        self.file_name: str = file_name
+        self.config = self.get_config()
+
+    def get_config(self) -> dict:
+        valid_keys = {"nb_drones": NumericProcessor(),
                   "start_hub": HubProcessor(),
                   "hub": HubProcessor(),
                   "end_hub": HubProcessor(),
                   "connection": ConnectionProcessor()}
 
-    with open(file_name, "r") as file:
-        config = {}
-        ln = 1
-        keys_numbers = 2
+        with open(self.file_name, "r") as file:
+            config = {}
+            ln = 1
+            keys_numbers = 2
 
-        for line in file:
+            for line in file:
 
-            line = line.strip()
-            if not line or line.startswith("#"):
+                line = line.strip()
+                if not line or line.startswith("#"):
+                    ln += 1
+                    continue
+
+                elif ":" not in line:
+                    raise ParserError(f"Syntax: {self.file_name} line {ln} missing ':'")
+
+                key, value = line.split(":", 1)
+                key = key.strip()
+                value = value.strip()
+
+                if key not in valid_keys.keys():
+                    raise ParserError(f"Unknown key in {self.file_name} at line {ln}")
+
+                if key in config.keys():
+                    new_key = f"{key}_{keys_numbers}"
+
+                    if key == "connection":
+                        keys_numbers = 1
+
+                    keys_numbers += 1
+                    config[new_key] = valid_keys[key].converter(value)
+                else:
+                    config[key] = valid_keys[key].converter(value)
+
                 ln += 1
-                continue
 
-            elif ":" not in line:
-                raise ParserError(f"Syntax: {file_name} line {ln} missing ':'")
+        flag = __verify_config(config)
 
-            key, value = line.split(":", 1)
-            key = key.strip()
-            value = value.strip()
+        return config
 
-            if key not in valid_keys.keys():
-                raise ParserError(f"Unknown key in {file_name} at line {ln}")
-
-            if key in config.keys():
-                new_key = f"{key}_{keys_numbers}"
-
-                if key == "connection":
-                    keys_numbers = 1
-
-                keys_numbers += 1
-                config[new_key] = valid_keys[key].converter(value)
-            else:
-                config[key] = valid_keys[key].converter(value)
-
-            ln += 1
-
-    return config
+        def __verify_config(self, config: dict[str, Any]) -> list[str]:
+            erros: list[str] = []
+            if "nb_drones" not in config:
+                erros.append("Missing key nb_drones")
+            if "nb_drones" and 
