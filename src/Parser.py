@@ -1,5 +1,7 @@
 from abc import ABC, abstractmethod
+from .Connection import Connection
 from typing import Any
+from .Hub import Hub
 
 
 class Processor(ABC):
@@ -7,17 +9,17 @@ class Processor(ABC):
     def converter(self, value: str) -> Any:
         pass
 
-    @staticmethod
-    def validate(value: str) -> int:
-        new_value = int(value)
-        if new_value < 0:
-            raise ValueError("Parsing: No Negative numbers allowed")
-        return new_value
-
 
 class NumericProcessor(Processor):
     def converter(self, value: str) -> int:
         return self.validate(value)
+
+    @staticmethod
+    def validate(value: str) -> int:
+        new_value = int(value)
+        if new_value < 0:
+            raise ValueError("Parsing: No negative nb_drones allowed")
+        return new_value
 
 
 class HubProcessor(Processor):
@@ -26,7 +28,7 @@ class HubProcessor(Processor):
 
         name, x, y, meta_data = value.split(" ", 3)
         hub["name"] = name
-        hub["coordenate"] = tuple((int(x), int(y)))
+        hub["coordinate"] = tuple((int(x), int(y)))
         hub["meta_data"] = meta_data
 
         return hub
@@ -34,24 +36,24 @@ class HubProcessor(Processor):
 
 class ConnectionProcessor(Processor):
     def converter(self, value: str) -> str:
-        conection: dict[str, Any] = {}
+        connection: dict[str, Any] = {}
 
         if "-" not in value:
-            raise ValueError(f"Missing '-' in conection: {value}")
+            raise ValueError(f"Missing '-' in connection: {value}")
 
         word_count = len(value.split())
 
         if word_count == 1:
             a, b = value.split("-")
-            conection["conections"] = tuple((a, b))
+            connection["connections"] = tuple((a, b))
 
         elif word_count == 2:
             left, right = value.split(" ")
             a, b = left.split("-")
-            conection["conections"] = tuple((a, b))
-            conection["meta_data"] = right
+            connection["connections"] = tuple((a, b))
+            connection["meta_data"] = right
 
-        return conection
+        return connection
 
 
 class ParserError(Exception):
@@ -61,9 +63,15 @@ class ParserError(Exception):
 class Parser:
     def __init__(self, file_name: str) -> None:
         self.file_name: str = file_name
-        self.config = self.get_config()
+        self.nb_drones = 0
+        self.start_hub = None
+        self.hubs: list[Hub] = []
+        self.end_hub = None
+        self.connections: List[Connection] = []
+        self.set_config()
 
-    def get_config(self) -> dict:
+
+    def set_config(self) -> None:
         valid_keys = {"nb_drones": NumericProcessor(),
                   "start_hub": HubProcessor(),
                   "hub": HubProcessor(),
@@ -71,9 +79,7 @@ class Parser:
                   "connection": ConnectionProcessor()}
 
         with open(self.file_name, "r") as file:
-            config = {}
             ln = 1
-            keys_numbers = 2
 
             for line in file:
 
@@ -92,25 +98,50 @@ class Parser:
                 if key not in valid_keys.keys():
                     raise ParserError(f"Unknown key in {self.file_name} at line {ln}")
 
-                if key in config.keys():
-                    new_key = f"{key}_{keys_numbers}"
+                if key == "nb_drones":
+                    config = valid_keys[key].converter(value)
+                    self.nb_drones = config
 
-                    if key == "connection":
-                        keys_numbers = 1
+                elif key == "start_hub":
+                    if self.start_hub != None:
+                        raise ParserError(f"Duplicate start_hub in line {ln}")
+                    else:
+                        config = valid_keys[key].converter(value)
+                        self.start_hub = Hub(config["name"], config["coordinate"], config["meta_data"])
 
-                    keys_numbers += 1
-                    config[new_key] = valid_keys[key].converter(value)
-                else:
-                    config[key] = valid_keys[key].converter(value)
+                elif key == "hub":
+                    config = valid_keys[key].converter(value)
+                    self.hubs.append(Hub(config["name"], config["coordinate"], config["meta_data"]))
+
+                elif key == "end_hub":
+                    if self.end_hub != None:
+                        raise ParserError(f"Duplicate end_hub in line {ln}")
+                    else:
+                        config = valid_keys[key].converter(value)
+                        self.end_hub = Hub(config["name"], config["coordinate"], config["meta_data"])
+
+                elif key == "connection":
+                    config = valid_keys[key].converter(value)
+                    if "meta_data" in config:
+                        self.connections.append(Connection(config["connections"], config["meta_data"]))
+                    else:
+                        self.connections.append(Connection(config["connections"]))
 
                 ln += 1
 
-        flag = __verify_config(config)
 
-        return config
+    def __verify_config(self, config: dict[str, Any]) -> list[Any]:
+        erros: list[str] = []
+        keys = ["nb_drones", "start_hub", "hub", "end_hub", "connection"]
 
-        def __verify_config(self, config: dict[str, Any]) -> list[str]:
-            erros: list[str] = []
-            if "nb_drones" not in config:
-                erros.append("Missing key nb_drones")
-            if "nb_drones" and 
+        for key in config.keys():
+            if key in keys:
+                keys.remove(key)
+
+        for key in keys:
+            erros.append(f"Missing key: {key}")
+
+        if len(erros) > 0:
+            return erros
+        else:
+            return 0

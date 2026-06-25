@@ -1,7 +1,7 @@
 from typing import Any
 
 
-class Node:
+class Hub:
     def __init__(self, name: str, pos: tuple, meta_data: str) -> None:
         self.name: str = name
         self.pos: tuple[int, int] = pos
