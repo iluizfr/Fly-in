@@ -1,6 +1,10 @@
 from typing import Any
 
 
+class HubError(Exception):
+    pass
+
+
 class Hub:
     def __init__(self, name: str, pos: tuple, meta_data: str) -> None:
         self.name: str = name
@@ -23,7 +27,7 @@ class Hub:
             key, value = data.split("=")
 
             if key not in keys:
-                raise ValueError(f"Wrong key in {meta_data}")
+                raise HubError(f"Wrong key in {meta_data}")
 
             if key == "max_drones" or key == "max_link_capacity":
                 new_meta_data[key] = int(value)

@@ -27,6 +27,8 @@ class HubProcessor(Processor):
         hub: dict[str, Any] = {}
 
         name, x, y, meta_data = value.split(" ", 3)
+        if "-" in name:
+            raise ValueError(f"HubProcessor: '-' not allowed in names of hub's")
         hub["name"] = name
         hub["coordinate"] = tuple((int(x), int(y)))
         hub["meta_data"] = meta_data
@@ -63,7 +65,7 @@ class ParserError(Exception):
 class Parser:
     def __init__(self, file_name: str) -> None:
         self.file_name: str = file_name
-        self.nb_drones = 0
+        self.nb_drones: int = 0
         self.start_hub = None
         self.hubs: list[Hub] = []
         self.end_hub = None
@@ -71,8 +73,10 @@ class Parser:
         self.set_config()
 
 
+
     def set_config(self) -> None:
-        valid_keys = {"nb_drones": NumericProcessor(),
+        stack_keys: list[str] = []
+        valid_keys: dict[str, Any] = {"nb_drones": NumericProcessor(),
                   "start_hub": HubProcessor(),
                   "hub": HubProcessor(),
                   "end_hub": HubProcessor(),
@@ -98,7 +102,19 @@ class Parser:
                 if key not in valid_keys.keys():
                     raise ParserError(f"Unknown key in {self.file_name} at line {ln}")
 
+                if key in stack_keys:
+                    raise ParserError(f"Duplicated key: {key} in line: {ln}")
+
+                stack_keys.append(key)
+
+                if key == "hub" or key == "connection":
+                    stack_keys.remove(key)
+
                 if key == "nb_drones":
+                    if self.start_hub is not None or len(self.hubs) != 0 \
+                        or self.end_hub is not None \
+                        or len(self.connections) != 0:
+                        raise ParserError("nb_drones not in first line")
                     config = valid_keys[key].converter(value)
                     self.nb_drones = config
 
@@ -129,19 +145,31 @@ class Parser:
 
                 ln += 1
 
+            self.__check_hubs_names()
+            self.__check_hubs_coordinates()
 
-    def __verify_config(self, config: dict[str, Any]) -> list[Any]:
-        erros: list[str] = []
-        keys = ["nb_drones", "start_hub", "hub", "end_hub", "connection"]
+    def __check_hubs_names(self) -> None:
+        stack_names: list[str] = []
+        stack_names.append(self.start_hub.name)
+        stack_names.append(self.end_hub.name)
 
-        for key in config.keys():
-            if key in keys:
-                keys.remove(key)
+        if self.start_hub.name == self.end_hub.name:
+            raise ParserError(f"Hub with duplicated name: {self.start_hub.name}")
 
-        for key in keys:
-            erros.append(f"Missing key: {key}")
+        for hub in self.hubs:
+            if hub.name in stack_names:
+                raise ParserError(f"Hub with duplicated name: {hub.name}")
+            stack_names.append(hub.name)
 
-        if len(erros) > 0:
-            return erros
-        else:
-            return 0
+    def __check_hubs_coordinates(self) -> None:
+        stack_coordinate: list[tuple[int, int]] = []
+        stack_coordinate.append(self.start_hub.pos)
+        stack_coordinate.append(self.end_hub.pos)
+
+        if self.start_hub.pos == self.end_hub.pos:
+            raise ParserError(f"Hub duplicated coordinate: {self.end_hub.pos}")
+
+        for hub in self.hubs:
+            if hub.pos in stack_coordinate:
+                raise ParserError(f"Hub with duplicated coordinate: {hub.pos}")
+            stack_coordinate.append(hub.pos)
