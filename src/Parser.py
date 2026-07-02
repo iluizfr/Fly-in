@@ -25,8 +25,19 @@ class NumericProcessor(Processor):
 class HubProcessor(Processor):
     def converter(self, value: str) -> Any:
         hub: dict[str, Any] = {}
+        pre_check: list[str] = value.split()
 
-        name, x, y, meta_data = value.split(" ", 3)
+        try:
+            n = int(pre_check[1])
+        except Exception:
+            raise ParserError("Hubprocessor: ' ' not allowed in names of hub's")
+
+        name = pre_check[0]
+        x = pre_check[1]
+        y = pre_check[2]
+        meta_data: str = ""
+        meta_data += " ".join(pre_check[3:])
+
         if "-" in name:
             raise ValueError(f"HubProcessor: '-' not allowed in names of hub's")
         hub["name"] = name
@@ -65,14 +76,13 @@ class ParserError(Exception):
 class Parser:
     def __init__(self, file_name: str) -> None:
         self.file_name: str = file_name
+        self._ln = 1
         self.nb_drones: int = 0
         self.start_hub = None
         self.hubs: list[Hub] = []
         self.end_hub = None
         self.connections: List[Connection] = []
         self.set_config()
-
-
 
     def set_config(self) -> None:
         stack_keys: list[str] = []
@@ -83,27 +93,26 @@ class Parser:
                   "connection": ConnectionProcessor()}
 
         with open(self.file_name, "r") as file:
-            ln = 1
 
             for line in file:
 
                 line = line.strip()
                 if not line or line.startswith("#"):
-                    ln += 1
+                    self._ln += 1
                     continue
 
                 elif ":" not in line:
-                    raise ParserError(f"Syntax: {self.file_name} line {ln} missing ':'")
+                    raise ParserError(f"Syntax: {self.file_name} line {self._ln} missing ':'")
 
                 key, value = line.split(":", 1)
                 key = key.strip()
                 value = value.strip()
 
                 if key not in valid_keys.keys():
-                    raise ParserError(f"Unknown key in {self.file_name} at line {ln}")
+                    raise ParserError(f"Unknown key in {self.file_name} at line {self._ln}")
 
                 if key in stack_keys:
-                    raise ParserError(f"Duplicated key: {key} in line: {ln}")
+                    raise ParserError(f"Duplicated key: {key} in line: {self._ln}")
 
                 stack_keys.append(key)
 
@@ -120,7 +129,7 @@ class Parser:
 
                 elif key == "start_hub":
                     if self.start_hub != None:
-                        raise ParserError(f"Duplicate start_hub in line {ln}")
+                        raise ParserError(f"Duplicate start_hub in line {self._ln}")
                     else:
                         config = valid_keys[key].converter(value)
                         self.start_hub = Hub(config["name"], config["coordinate"], config["meta_data"])
@@ -131,7 +140,7 @@ class Parser:
 
                 elif key == "end_hub":
                     if self.end_hub != None:
-                        raise ParserError(f"Duplicate end_hub in line {ln}")
+                        raise ParserError(f"Duplicate end_hub in line {self._ln}")
                     else:
                         config = valid_keys[key].converter(value)
                         self.end_hub = Hub(config["name"], config["coordinate"], config["meta_data"])
@@ -139,14 +148,16 @@ class Parser:
                 elif key == "connection":
                     config = valid_keys[key].converter(value)
                     if "meta_data" in config:
-                        self.connections.append(Connection(config["connections"], config["meta_data"]))
+                        self.connections.append(
+                            Connection(config["connections"], config["meta_data"]))
                     else:
                         self.connections.append(Connection(config["connections"]))
 
-                ln += 1
+                self._ln += 1
 
             self.__check_hubs_names()
             self.__check_hubs_coordinates()
+            self.__check_connections()
 
     def __check_hubs_names(self) -> None:
         stack_names: list[str] = []
@@ -173,3 +184,52 @@ class Parser:
             if hub.pos in stack_coordinate:
                 raise ParserError(f"Hub with duplicated coordinate: {hub.pos}")
             stack_coordinate.append(hub.pos)
+
+    def __check_connections(self) -> None:
+        previus_connections = []
+        previus_reverse_connections = []
+        hubs_names: list[str] = []
+
+        hubs_names = [hub.name for hub in self.hubs]
+        hubs_names.append(self.start_hub.name)
+        hubs_names.append(self.end_hub.name)
+
+        for c in self.connections:
+            a, b = c.connection
+
+            if a not in hubs_names:
+                raise ParserError(f"Connection: {a} not in hubs names")
+            if b not in hubs_names:
+                raise ParserError(f"Connection: {b} not in hubs names")
+
+
+            if c.connection in previus_connections \
+                or c.connection in previus_reverse_connections:
+                raise ParserError(f"Duplicated connection: {c.connection}")
+
+            previus_connections.append(tuple((a, b)))
+            previus_reverse_connections.append(tuple((b, a)))
+
+
+    def display_parser(self) -> None:
+        print(f"nb_drone: {self.nb_drones}\n")
+        print("start_hub:")
+        print(f"    name: {self.start_hub.name}")
+        print(f"    pos: {self.start_hub.pos}")
+        print(f"    meta data: {self.start_hub.meta_data}\n")
+
+        print("Hubs:")
+        for hub in self.hubs:
+            print(f"    name: {hub.name}")
+            print(f"    pos: {hub.pos}")
+            print(f"    meta data: {hub.meta_data}\n")
+
+        print("end_hub:")
+        print(f"    name: {self.end_hub.name}")
+        print(f"    pos: {self.end_hub.pos}")
+        print(f"    meta data: {self.end_hub.meta_data}\n")
+
+        print("Connections:")
+        for connection in self.connections:
+            print(f"    Connection: {connection.connection}")
+            print(f"    meta data: {connection.meta_data}\n")
