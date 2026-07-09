@@ -5,7 +5,10 @@ import sys
 def main() -> None:
     try:
         parser = Parser("map.txt")
-        parser.display_parser()
+        graph = Graph(parser)
+
+        graph.dict_graph_info()
+
 
     except (ParserError, ValueError, HubError, ConectionError) as error:
         print(f"Error: {error}")

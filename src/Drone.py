@@ -1,3 +1,3 @@
 class Drone:
-    def __init__(self) -> None:
-        pass
+    def __init__(self, id: str) -> None:
+        self.id = id

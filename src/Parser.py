@@ -81,7 +81,7 @@ class Parser:
         self.start_hub = None
         self.hubs: list[Hub] = []
         self.end_hub = None
-        self.connections: List[Connection] = []
+        self.connections: list[Connection] = []
         self.set_config()
 
     def set_config(self) -> None:
