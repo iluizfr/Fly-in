@@ -3,6 +3,7 @@ from .Hub import Hub
 from .Connection import Connection
 from .Drone import Drone
 from .Parser import Parser
+from collections import deque
 
 
 class Graph():
@@ -13,33 +14,30 @@ class Graph():
         self.connections: list[Connection] = parser.connections
         self.end_hub: Hub = parser.end_hub
         self.drones: list[Drone] = []
+
+        self.hub_by_name: dict[str, Hub] = {
+            self.start_hub.name: self.start_hub,
+            self.end_hub.name: self.end_hub
+        }
+
+        for hub in self.hubs:
+            self.hub_by_name[hub.name] = hub
+
         self.dict_graph: dict[Hub, list[Hub]] = self.__set_dict_graph()
+
         self.__generate_drones()
 
     def __set_dict_graph(self) -> dict[Hub, list[Hub]]:
         graph: dict[Hub, list[Hub]] = {}
-        node_a = None
-        node_b = None
 
         for c in self.connections:
             a, b = c.connection
 
-            if a == self.start_hub.name:
-                node_a = self.start_hub
-            elif a == self.end_hub.name:
-                node_a = self.end_hub
-            if b == self.start_hub.name:
-                node_b = self.start_hub
-            elif b == self.end_hub.name:
-                node_b = self.end_hub
-
-            for hub in self.hubs:
-                if a == hub.name:
-                    node_a = hub
-                elif b == hub.name:
-                    node_b = hub
+            node_a = self.hub_by_name[a]
+            node_b = self.hub_by_name[b]
 
             graph.setdefault(node_a, []).append(node_b)
+            graph.setdefault(node_b, []).append(node_a)
 
         return graph
 
@@ -51,6 +49,42 @@ class Graph():
             drone = Drone(new_drone_id)
             self.drones.append(drone)
             drone_id += 1
+
+    def find_path(self, start: Hub, end: Hub) -> list[Hub]:
+        queue = deque([start])
+        visited: set[Hub] = {start}
+        father: dict[Hub, Hub] = {}
+
+        while queue:
+            current = queue.popleft()
+
+            if current == end:
+                break
+
+            for neighbor in self.dict_graph.get(current, []):
+
+                if neighbor.is_blocked():
+                    continue
+
+                if neighbor not in visited:
+                    visited.add(neighbor)
+                    father[neighbor] = current
+                    queue.append(neighbor)
+
+        if end not in visited:
+            return []
+
+        path = []
+        current = end
+
+        while current != start:
+            path.append(current)
+            current = father[current]
+
+        path.append(start)
+        path.reverse()
+
+        return path
 
     def hubs_info(self) -> None:
         print("start_hub:")

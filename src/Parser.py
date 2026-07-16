@@ -210,7 +210,6 @@ class Parser:
             previus_connections.append(tuple((a, b)))
             previus_reverse_connections.append(tuple((b, a)))
 
-
     def display_parser(self) -> None:
         print(f"nb_drone: {self.nb_drones}\n")
         print("start_hub:")

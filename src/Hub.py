@@ -13,15 +13,21 @@ class Hub:
         self.pos: tuple[int, int] = pos
         self.meta_data: dict[str, Any] = self.__check_meta_data(meta_data)
         self.drones: list[Drone] = []
-        self.connection: Connection = None
+        self.type: str = self.meta_data["zone"]
+        self.color: str | None = self.meta_data["color"]
+        self.max_drones: int = self.meta_data["max_drones"]
 
     def __check_meta_data(self, meta_data: str) -> dict:
-        keys = ["color", "max_drones", "zone", "max_link_capacity"]
+        keys = ["color", "max_drones", "zone"]
         valid_zones = ["normal", "blocked", "restricted", "priority"]
         new_meta_data: dict[str, Any] = {}
 
+        new_meta_data["zone"] = "normal"
+        new_meta_data["color"] = None
+        new_meta_data["max_drones"] = 1
+
         if not meta_data or not meta_data.strip():
-            return {}
+            return new_meta_data
 
         meta_data = meta_data.strip("[")
         meta_data = meta_data.strip("]")
@@ -35,7 +41,7 @@ class Hub:
             if key not in keys:
                 raise HubError(f"Hub: Wrong key in {meta_data}")
 
-            if key == "max_drones" or key == "max_link_capacity":
+            if key == "max_drones":
                 new_meta_data[key] = int(value)
 
                 if new_meta_data[key] < 0:
@@ -48,3 +54,15 @@ class Hub:
                 new_meta_data[key] = value.strip()
 
         return new_meta_data
+
+    @property
+    def movement_cost(self) -> int:
+        if self.type == "restricted":
+            return 2
+        return 1
+
+    def is_blocked(self) -> bool:
+        return self.type == "blocked"
+
+    def has_space(self) -> bool:
+        return len(self.drones) < self.max_drones

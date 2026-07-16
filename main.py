@@ -1,4 +1,5 @@
-from src import Parser, ParserError, Graph, Hub, HubError, ConectionError
+from src import Parser, ParserError, Graph, HubError, ConectionError
+from src import Simulator
 import sys 
 
 
@@ -7,7 +8,9 @@ def main() -> None:
         parser = Parser("map.txt")
         graph = Graph(parser)
 
-        graph.dict_graph_info()
+        simulator = Simulator(graph)
+        simulator.simulate()
+
 
 
     except (ParserError, ValueError, HubError, ConectionError) as error:
