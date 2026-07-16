@@ -17,6 +17,9 @@ class Hub:
         self.color: str | None = self.meta_data["color"]
         self.max_drones: int = self.meta_data["max_drones"]
 
+    def __repr__(self) -> str:
+        return self.name
+
     def __check_meta_data(self, meta_data: str) -> dict:
         keys = ["color", "max_drones", "zone"]
         valid_zones = ["normal", "blocked", "restricted", "priority"]

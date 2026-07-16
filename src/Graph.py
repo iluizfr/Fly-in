@@ -27,6 +27,9 @@ class Graph():
 
         self.__generate_drones()
 
+    def __repr__(self) -> str:
+        return "Graph"
+
     def __set_dict_graph(self) -> dict[Hub, list[Hub]]:
         graph: dict[Hub, list[Hub]] = {}
 

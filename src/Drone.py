@@ -6,3 +6,6 @@ class Drone:
         self.path_index = 0
         self.remaining_turns = 0
         self.finished = False
+
+    def __repr__(self) -> str:
+        return self.id

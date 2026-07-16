@@ -18,6 +18,9 @@ class Simulator:
             drone.path = self.class_graph.find_path(self.start_hub, self.end_hub)
             graph.start_hub.drones.append(drone)
 
+    def __repr__(self) -> str:
+        return "Simulator"
+
     def simulate(self):
         while self.drones:
             self.simulate_turn()
