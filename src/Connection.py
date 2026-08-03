@@ -1,4 +1,6 @@
 from typing import Optional, Any
+from .Hub import Hub
+from .Drone import Drone
 
 
 class ConectionError(Exception):
@@ -6,11 +8,14 @@ class ConectionError(Exception):
 
 
 class Connection:
-    def __init__(self, connection: tuple[str, str], meta_data: Optional[str] = None) -> None:
-        self.connection: tuple[str, str] = connection
+    def __init__(self, connection: tuple[Hub, Hub], meta_data: Optional[str] = None) -> None:
+        self.connection: tuple[Hub, Hub] = connection
         self.meta_data: dict[str, Any] = self.__check_meta_data(meta_data)
         self.max_capacity = self.meta_data["max_link_capacity"]
-        self.drones = []
+        self.drones: list[Drone] = []
+
+    def has_space(self) -> bool:
+        return len(self.drones) < self.max_capacity
 
     def __check_meta_data(self, meta_data: str) -> dict:
         keys = ["max_link_capacity"]
@@ -38,6 +43,3 @@ class Connection:
                     raise ConectionError(f"Values for '{key}' must be positive'")
 
         return new_meta_data
-
-    def has_space(self) -> bool:
-        return len(self.drones) < self.max_capacity

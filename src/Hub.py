@@ -1,6 +1,5 @@
 from typing import Any
 from .Drone import Drone
-from .Connection import Connection
 
 
 class HubError(Exception):

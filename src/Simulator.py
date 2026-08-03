@@ -1,6 +1,6 @@
 from .Graph import Graph
 from .Drone import Drone
-from .Hub import  Hub
+from .Hub import Hub
 
 
 class Simulator:
@@ -10,25 +10,51 @@ class Simulator:
         self.start_hub = graph.start_hub
         self.end_hub = graph.end_hub
         self.delivered_drones = []
-        self.graph: dict[Hub: list[Hub]] = graph.dict_graph
+        self.graph: dict[Hub, list[Hub]] = graph.dict_graph
         self.current_turn = 0
 
         for drone in self.drones:
             drone.current_hub = self.start_hub
+            drone.current_connection = None
+            drone.destination_hub = None
+            drone.just_arrived = False
             drone.path = self.class_graph.find_path(self.start_hub, self.end_hub)
-            graph.start_hub.drones.append(drone)
+            self.start_hub.drones.append(drone)
 
     def __repr__(self) -> str:
         return "Simulator"
 
-    def simulate(self):
+    def simulate(self) -> None:
         while self.drones:
-            self.simulate_turn()
-            self.current_turn += 1
-            print()
+            printed = self.simulate_turn()
 
-    def simulate_turn(self) -> None:
+            if printed:
+                print()
+
+            self.current_turn += 1
+
+    def simulate_turn(self) -> bool:
+        printed = False
+
+        for drone in self.drones:
+            if drone.remaining_turns > 0:
+                drone.remaining_turns -= 1
+
+        for drone in self.drones:
+            if (
+                drone.current_connection is not None
+                and drone.remaining_turns == 0
+                ):
+                self.finish_restricted_move(drone)
+                drone.just_arrived = True
+
         for drone in self.drones[:]:
+            if drone.remaining_turns > 0:
+                continue
+
+            if drone.just_arrived:
+                drone.just_arrived = False
+                continue
 
             current_hub = drone.current_hub
             drone.path = self.class_graph.find_path(current_hub, self.end_hub)
@@ -42,20 +68,69 @@ class Simulator:
                 self.drones.remove(drone)
                 continue
 
-            self.move_drone(drone)
+            if self.move_drone(drone):
+                printed = True
 
             if drone in self.end_hub.drones:
                 self.delivered_drones.append(drone)
                 self.end_hub.drones.remove(drone)
                 self.drones.remove(drone)
 
-    def move_drone(self, drone: Drone) -> None:
+        return printed
+
+    def move_drone(self, drone: Drone) -> bool:
         current_hub = drone.path[0]
         next_hub = drone.path[1]
 
-        if next_hub.has_space():
-            next_hub.drones.append(drone)
-            current_hub.drones.remove(drone)
-            drone.current_hub = next_hub
+        if next_hub.type == "restricted":
+            return self.start_restricted_move(drone, current_hub, next_hub)
 
-            print(f"{drone.id}-{next_hub.name} ", end="")
+        if not next_hub.has_space():
+            return False
+
+        return self.normal_move(drone, current_hub, next_hub)
+
+    def normal_move(self, drone: Drone, current_hub: Hub, next_hub: Hub) -> bool:
+
+        current_hub.drones.remove(drone)
+        next_hub.drones.append(drone)
+
+        drone.current_hub = next_hub
+
+        print(f"{drone.id}-{next_hub.name}", end=" ")
+        return True
+
+    def start_restricted_move(self, drone: Drone, current_hub: Hub, next_hub: Hub) -> bool:
+        connection = self.class_graph.get_connection(current_hub,  next_hub)
+
+        if connection is None:
+            return False
+
+        if not connection.has_space():
+            return False
+
+        current_hub.drones.remove(drone)
+
+        connection.drones.append(drone)
+
+        drone.current_hub = None
+        drone.current_connection = connection
+        drone.destination_hub = next_hub
+        drone.remaining_turns = 1
+
+        print(f"{drone.id}-{current_hub.name}-{next_hub.name}", end=" ")
+        return True
+
+    def finish_restricted_move(self, drone: Drone) -> None:
+        connection = drone.current_connection
+
+        connection.drones.remove(drone)
+
+        destination = drone.destination_hub
+
+        destination.drones.append(drone)
+
+        drone.current_hub = destination
+        drone.current_connection = None
+        drone.destination_hub = None
+        drone.remaining_turns = 0

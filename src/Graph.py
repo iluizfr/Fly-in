@@ -1,4 +1,3 @@
-from typing import Any
 from .Hub import Hub
 from .Connection import Connection
 from .Drone import Drone
@@ -33,11 +32,13 @@ class Graph():
     def __set_dict_graph(self) -> dict[Hub, list[Hub]]:
         graph: dict[Hub, list[Hub]] = {}
 
-        for c in self.connections:
-            a, b = c.connection
+        for connection in self.connections:
+            a, b = connection.connection
 
             node_a = self.hub_by_name[a]
             node_b = self.hub_by_name[b]
+
+            connection.connection = (node_a, node_b)
 
             graph.setdefault(node_a, []).append(node_b)
             graph.setdefault(node_b, []).append(node_a)
@@ -88,6 +89,15 @@ class Graph():
         path.reverse()
 
         return path
+
+    def get_connection(self, hub_a: Hub, hub_b: Hub) -> Connection | None:
+        for connection in self.connections:
+            a, b = connection.connection
+
+            if (a == hub_a and b == hub_b) or (a == hub_b and b == hub_a):
+                return connection
+
+        return None
 
     def hubs_info(self) -> None:
         print("start_hub:")
