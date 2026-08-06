@@ -84,6 +84,9 @@ class Parser:
         self.connections: list[Connection] = []
         self.set_config()
 
+    def __repr__(self):
+        return "Parser"
+
     def set_config(self) -> None:
         stack_keys: list[str] = []
         valid_keys: dict[str, Any] = {"nb_drones": NumericProcessor(),

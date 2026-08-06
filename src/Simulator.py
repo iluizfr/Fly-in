@@ -1,3 +1,4 @@
+from src.Connection import Connection
 from .Graph import Graph
 from .Drone import Drone
 from .Hub import Hub
@@ -18,7 +19,7 @@ class Simulator:
             drone.current_connection = None
             drone.destination_hub = None
             drone.just_arrived = False
-            drone.path = self.class_graph.find_path(self.start_hub, self.end_hub)
+            drone.path = self.class_graph.dijkstra(self.start_hub, self.end_hub)
             self.start_hub.drones.append(drone)
 
     def __repr__(self) -> str:
@@ -57,9 +58,9 @@ class Simulator:
                 continue
 
             current_hub = drone.current_hub
-            drone.path = self.class_graph.find_path(current_hub, self.end_hub)
+            drone.path = self.class_graph.dijkstra(current_hub, self.end_hub)
 
-            if len(drone.path) < 2:
+            if len(drone.path) < 2 and drone.path is not None:
                 self.delivered_drones.append(drone)
 
                 if drone in self.end_hub.drones:
@@ -82,17 +83,32 @@ class Simulator:
         current_hub = drone.path[0]
         next_hub = drone.path[1]
 
-        if next_hub.type == "restricted":
-            return self.start_restricted_move(drone, current_hub, next_hub)
+        connection = self.get_next_connection(current_hub, next_hub)
 
-        if not next_hub.has_space():
+        if connection is None:
             return False
 
-        return self.normal_move(drone, current_hub, next_hub)
+        if next_hub.type != "restricted":
+            if not next_hub.has_space():
+                return False
 
-    def normal_move(self, drone: Drone, current_hub: Hub, next_hub: Hub) -> bool:
+        if not connection.enter(drone):
+            return False
+
+        if next_hub.type == "restricted":
+            return self.start_restricted_move(drone, current_hub,
+                                              next_hub, connection)
+
+        return self.normal_move(drone, current_hub, next_hub, connection)
+
+    def get_next_connection(self, current_hub: Hub, next_hub: Hub):
+        return self.class_graph.get_connection(current_hub, next_hub)
+
+    def normal_move(self, drone: Drone, current_hub: Hub,
+                    next_hub: Hub, connection: Connection) -> bool:
 
         current_hub.drones.remove(drone)
+        connection.leave(drone)
         next_hub.drones.append(drone)
 
         drone.current_hub = next_hub
@@ -100,18 +116,10 @@ class Simulator:
         print(f"{drone.id}-{next_hub.name}", end=" ")
         return True
 
-    def start_restricted_move(self, drone: Drone, current_hub: Hub, next_hub: Hub) -> bool:
-        connection = self.class_graph.get_connection(current_hub,  next_hub)
-
-        if connection is None:
-            return False
-
-        if not connection.has_space():
-            return False
+    def start_restricted_move(self, drone: Drone, current_hub: Hub,
+                              next_hub: Hub, connection: Connection) -> bool:
 
         current_hub.drones.remove(drone)
-
-        connection.drones.append(drone)
 
         drone.current_hub = None
         drone.current_connection = connection
@@ -124,7 +132,7 @@ class Simulator:
     def finish_restricted_move(self, drone: Drone) -> None:
         connection = drone.current_connection
 
-        connection.drones.remove(drone)
+        connection.leave(drone)
 
         destination = drone.destination_hub
 

@@ -8,4 +8,4 @@ from .Simulator import Simulator
 
 __all__ = ["Parser", "ParserError", "Graph", "Hub",
            "Connection", "HubError", "Drone", 'ConectionError',
-           "Simulator"]
+           "Simulator", "Connection"]

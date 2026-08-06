@@ -14,6 +14,9 @@ class Connection:
         self.max_capacity = self.meta_data["max_link_capacity"]
         self.drones: list[Drone] = []
 
+    def __repr__(self):
+        return "Connection"
+
     def has_space(self) -> bool:
         return len(self.drones) < self.max_capacity
 
@@ -43,3 +46,13 @@ class Connection:
                     raise ConectionError(f"Values for '{key}' must be positive'")
 
         return new_meta_data
+
+    def enter(self, drone: Drone) -> bool:
+        if not self.has_space():
+            return False
+
+        self.drones.append(drone)
+        return True
+
+    def leave(self, drone: Drone) -> None:
+        self.drones.remove(drone)

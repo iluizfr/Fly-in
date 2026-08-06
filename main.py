@@ -8,14 +8,11 @@ def main() -> None:
         parser = Parser("map.txt")
         graph = Graph(parser)
 
-
         simulator = Simulator(graph)
         simulator.simulate()
 
-
         #render = Render(graph)
         #render.run()
-
 
     except (ParserError, ValueError, HubError, ConectionError) as error:
         print(f"Error: {error}")

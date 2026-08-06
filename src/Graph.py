@@ -3,6 +3,7 @@ from .Connection import Connection
 from .Drone import Drone
 from .Parser import Parser
 from collections import deque
+import heapq
 
 
 class Graph():
@@ -54,7 +55,7 @@ class Graph():
             self.drones.append(drone)
             drone_id += 1
 
-    def find_path(self, start: Hub, end: Hub) -> list[Hub]:
+    def bfs(self, start: Hub, end: Hub) -> list[Hub]:
         queue = deque([start])
         visited: set[Hub] = {start}
         father: dict[Hub, Hub] = {}
@@ -87,6 +88,49 @@ class Graph():
 
         path.append(start)
         path.reverse()
+
+        return path
+
+    def dijkstra(self, start: Hub, end: Hub) -> list[Hub]:
+        distances = {hub: float("inf") for hub in self.dict_graph}
+        previous = {hub: None for hub in self.dict_graph}
+
+        distances[start] = 0
+        queue = [(0, start.name, start)]
+
+        while queue:
+            current_distance, _, current = heapq.heappop(queue)
+
+            if current == end:
+                break
+
+            if current_distance > distances[current]:
+                continue
+
+            for neighbor in self.dict_graph[current]:
+                if neighbor != end and neighbor.is_blocked():
+                    continue
+
+                connection = self.get_connection(current, neighbor)
+                weight = connection.max_capacity
+                new_distance = current_distance + weight
+
+                if new_distance < distances[neighbor]:
+                    distances[neighbor] = new_distance
+                    previous[neighbor] = current
+                    heapq.heappush(queue, (new_distance, neighbor.name, neighbor))
+
+        path = []
+        node = end
+
+        while node is not None:
+            path.append(node)
+            node = previous[node]
+
+        path.reverse()
+
+        if path[0] != start:
+            return None
 
         return path
 
