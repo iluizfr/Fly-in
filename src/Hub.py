@@ -57,7 +57,6 @@ class Hub:
 
         return new_meta_data
 
-    @property
     def movement_cost(self) -> int:
         if self.type == "restricted":
             return 2

@@ -112,7 +112,7 @@ class Graph():
                     continue
 
                 connection = self.get_connection(current, neighbor)
-                weight = connection.max_capacity
+                weight = current.movement_cost()
                 new_distance = current_distance + weight
 
                 if new_distance < distances[neighbor]:
