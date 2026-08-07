@@ -15,7 +15,8 @@ class Connection:
         self.drones: list[Drone] = []
 
     def __repr__(self):
-        return "Connection"
+        a, b = self.connection
+        return f"Connection: {a}, {b}"
 
     def has_space(self) -> bool:
         return len(self.drones) < self.max_capacity

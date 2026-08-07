@@ -6,11 +6,11 @@ from .Hub import Hub
 
 class Simulator:
     def __init__(self, graph: Graph) -> None:
-        self.class_graph = graph
-        self.drones = graph.drones
-        self.start_hub = graph.start_hub
-        self.end_hub = graph.end_hub
-        self.delivered_drones = []
+        self.class_graph: Graph = graph
+        self.drones: list[Drone] = graph.drones
+        self.start_hub: Hub = graph.start_hub
+        self.end_hub: Hub = graph.end_hub
+        self.delivered_drones: list[Drone] = []
         self.graph: dict[Hub, list[Hub]] = graph.dict_graph
         self.current_turn = 0
 

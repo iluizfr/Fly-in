@@ -1,34 +1,29 @@
 from src import Parser, ParserError, Graph, HubError, ConectionError
 from src import Simulator
 import sys, os
-from pathlib import Path
-import shutil
 
 
 def menu() -> str:
-    os.system("clear")
     print("=" * 20)
     print("Fly-in")
 
-    print("Choose difficult:")
+    print("\nChoose difficult:")
     print("challenger\neasy\nhard\nmedium")
-    dif = input("choice: ")
+    dif = input("\nchoice: ")
 
     filles = os.listdir(f"maps/{dif}")
-    os.system("clear")
-    print("=" * 20)
-    print("Fly-in")
-    print("Choose the map:")
+    print("\nChoose the map:")
 
+    i = 1
     for map in filles:
-        print(map)
-    mapa = input("map: ")
+        print(f"{i}: {map}")
+        i += 1
+    n = int(input("\nmap: "))
+    n -= 1
+    mapa = filles[n]
+    print()
 
-    ori = Path(f"maps/{dif}/{mapa}")
-    dest = Path(f"../../{mapa}")
-    shutil.copy(ori, dest)
-
-    return mapa
+    return f"maps/{dif}/{mapa}"
 
 
 def main() -> None:
@@ -38,6 +33,7 @@ def main() -> None:
 
         simulator = Simulator(graph)
         simulator.simulate()
+        print(f"\nTurnos: {simulator.current_turn}")
 
         #render = Render(graph)
         #render.run()

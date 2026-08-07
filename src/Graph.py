@@ -111,9 +111,11 @@ class Graph():
                 if neighbor != end and neighbor.is_blocked():
                     continue
 
-                connection = self.get_connection(current, neighbor)
-                weight = current.movement_cost()
+                weight = neighbor.movement_cost()
                 new_distance = current_distance + weight
+
+                if neighbor.type == "priority":
+                    weight -= 1
 
                 if new_distance < distances[neighbor]:
                     distances[neighbor] = new_distance
@@ -130,7 +132,7 @@ class Graph():
         path.reverse()
 
         if path[0] != start:
-            return None
+            return []
 
         return path
 
