@@ -25,15 +25,6 @@ class Simulator:
     def __repr__(self) -> str:
         return "Simulator"
 
-    def simulate(self) -> None:
-        while self.drones:
-            printed = self.simulate_turn()
-
-            if printed:
-                print()
-
-            self.current_turn += 1
-
     def simulate_turn(self) -> bool:
         printed = False
 

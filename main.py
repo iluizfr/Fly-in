@@ -1,42 +1,37 @@
 from src import Parser, ParserError, Graph, HubError, ConectionError
-from src import Simulator
+from src import Simulator, Renderer, Menu
 import sys, os
-
-
-def menu() -> str:
-    print("=" * 20)
-    print("Fly-in")
-
-    print("\nChoose difficult:")
-    print("challenger\neasy\nhard\nmedium")
-    dif = input("\nchoice: ")
-
-    filles = os.listdir(f"maps/{dif}")
-    print("\nChoose the map:")
-
-    i = 1
-    for map in filles:
-        print(f"{i}: {map}")
-        i += 1
-    n = int(input("\nmap: "))
-    n -= 1
-    mapa = filles[n]
-    print()
-
-    return f"maps/{dif}/{mapa}"
+import pygame
 
 
 def main() -> None:
     try:
-        parser = Parser(menu())
+        menu = Menu()
+        path = menu.display()
+        parser = Parser(path)
         graph = Graph(parser)
-
         simulator = Simulator(graph)
-        simulator.simulate()
-        print(f"\nTurnos: {simulator.current_turn}")
+        renderer = Renderer(simulator)
 
-        #render = Render(graph)
-        #render.run()
+        scale, hub_size, drone_size = menu.get_info()
+        renderer.set_sizes(scale, hub_size, drone_size)
+        clock = pygame.time.Clock()
+
+        print(f"Number of drones: {len(graph.drones)}\n")
+
+        while renderer.running and simulator.drones:
+            renderer.update()
+            renderer.draw()
+            printed = simulator.simulate_turn()
+            clock.tick(1)
+
+            if printed:
+                print()
+
+            simulator.current_turn += 1
+
+        print(f"\nTurnos: {simulator.current_turn}")
+        print("=" * 20)
 
     except (ParserError, ValueError, HubError, ConectionError) as error:
         print(f"Error: {error}")

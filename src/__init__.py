@@ -4,8 +4,10 @@ from .Hub import Hub, HubError
 from .Connection import Connection, ConectionError
 from .Drone import Drone
 from .Simulator import Simulator
+from .Renderer import Renderer
+from .Menu import Menu
 
 
 __all__ = ["Parser", "ParserError", "Graph", "Hub",
            "Connection", "HubError", "Drone", 'ConectionError',
-           "Simulator", "Connection"]
+           "Simulator", "Connection", "Menu"]
