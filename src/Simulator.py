@@ -63,10 +63,10 @@ class Simulator:
             if self.move_drone(drone):
                 printed = True
 
-            if drone in self.end_hub.drones:
-                self.delivered_drones.append(drone)
-                self.end_hub.drones.remove(drone)
-                self.drones.remove(drone)
+            #if drone in self.end_hub.drones:
+                #self.delivered_drones.append(drone)
+                #self.end_hub.drones.remove(drone)
+                #self.drones.remove(drone)
 
         return printed
 

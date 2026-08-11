@@ -30,6 +30,8 @@ def main() -> None:
 
             simulator.current_turn += 1
 
+        renderer.draw()
+
         print(f"\nTurnos: {simulator.current_turn}")
         print("=" * 20)
 

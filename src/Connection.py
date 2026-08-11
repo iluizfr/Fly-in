@@ -16,7 +16,7 @@ class Connection:
 
     def __repr__(self):
         a, b = self.connection
-        return f"Connection: {a}, {b}"
+        return f"Connection: {a.name}, {b.name}"
 
     def has_space(self) -> bool:
         return len(self.drones) < self.max_capacity

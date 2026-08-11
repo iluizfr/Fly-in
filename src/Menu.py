@@ -7,6 +7,9 @@ class Menu:
         self.drone_size = 8
         self.hub_size = 20
 
+    def __repr__(self) -> str:
+        return "Menu"
+
     def display(self) -> str:
         print("=" * 20)
         print("Fly-in")
@@ -15,8 +18,13 @@ class Menu:
         print("challenger\neasy\nhard\nmedium")
         dif = input("\nchoice: ")
 
-        if dif == "hard":
-            self.scale = 80
+        if dif == "easy":
+            self.scale = 120
+            self.drone_size = 13
+
+        elif dif == "hard":
+            self.scale = 70
+            self.drone_size = 13
 
         elif dif == "challenger":
             self.scale = 40
