@@ -1,13 +1,13 @@
 from src import Parser, ParserError, Graph, HubError, ConectionError
 from src import Simulator, Renderer, Menu
-import sys, os
 import pygame
+import sys
 
 
 def main() -> None:
     try:
         menu = Menu()
-        path = menu.display()
+        path: str = menu.display()
         parser = Parser(path)
         graph = Graph(parser)
         simulator = Simulator(graph)

@@ -26,6 +26,10 @@ class Menu:
             self.scale = 70
             self.drone_size = 13
 
+        elif dif == "medium":
+            self.scale = 120
+            self.drone_size = 13
+
         elif dif == "challenger":
             self.scale = 40
             self.drone_size = 4

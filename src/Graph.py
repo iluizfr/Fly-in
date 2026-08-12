@@ -120,7 +120,8 @@ class Graph():
                 if new_distance < distances[neighbor]:
                     distances[neighbor] = new_distance
                     previous[neighbor] = current
-                    heapq.heappush(queue, (new_distance, neighbor.name, neighbor))
+                    heapq.heappush(
+                        queue, (new_distance, neighbor.name, neighbor))
 
         path = []
         node = end

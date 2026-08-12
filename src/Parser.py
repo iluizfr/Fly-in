@@ -29,8 +29,10 @@ class HubProcessor(Processor):
 
         try:
             n = int(pre_check[1])
+            n = n
         except Exception:
-            raise ParserError("Hubprocessor: ' ' not allowed in names of hub's")
+            raise ParserError(
+                "Hubprocessor: ' ' not allowed in names of hub's")
 
         name = pre_check[0]
         x = pre_check[1]
@@ -39,7 +41,8 @@ class HubProcessor(Processor):
         meta_data += " ".join(pre_check[3:])
 
         if "-" in name:
-            raise ValueError(f"HubProcessor: '-' not allowed in names of hub's")
+            raise ValueError(
+                "HubProcessor: '-' not allowed in names of hub's")
         hub["name"] = name
         hub["coordinate"] = tuple((int(x), int(y)))
         hub["meta_data"] = meta_data
@@ -48,7 +51,7 @@ class HubProcessor(Processor):
 
 
 class ConnectionProcessor(Processor):
-    def converter(self, value: str) -> str:
+    def converter(self, value: str) -> dict[str, Any]:
         connection: dict[str, Any] = {}
 
         if "-" not in value:
@@ -75,25 +78,25 @@ class ParserError(Exception):
 
 class Parser:
     def __init__(self, file_name: str) -> None:
-        self.file_name: str = file_name
-        self._ln = 1
-        self.nb_drones: int = 0
-        self.start_hub = None
-        self.hubs: list[Hub] = []
-        self.end_hub = None
         self.connections: list[Connection] = []
+        self.file_name: str = file_name
+        self.start_hub: Hub | None = None
+        self.hubs: list[Hub] = []
+        self.nb_drones: int = 0
+        self.end_hub: Hub | None = None
+        self.ln = 1
         self.set_config()
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return "Parser"
 
     def set_config(self) -> None:
         stack_keys: list[str] = []
         valid_keys: dict[str, Any] = {"nb_drones": NumericProcessor(),
-                  "start_hub": HubProcessor(),
-                  "hub": HubProcessor(),
-                  "end_hub": HubProcessor(),
-                  "connection": ConnectionProcessor()}
+                                      "start_hub": HubProcessor(),
+                                      "hub": HubProcessor(),
+                                      "end_hub": HubProcessor(),
+                                      "connection": ConnectionProcessor()}
 
         with open(self.file_name, "r") as file:
 
@@ -101,21 +104,24 @@ class Parser:
 
                 line = line.strip()
                 if not line or line.startswith("#"):
-                    self._ln += 1
+                    self.ln += 1
                     continue
 
                 elif ":" not in line:
-                    raise ParserError(f"Syntax: {self.file_name} line {self._ln} missing ':'")
+                    raise ParserError(
+                        f"Syntax: {self.file_name} line {self.ln} missing ':'")
 
                 key, value = line.split(":", 1)
                 key = key.strip()
                 value = value.strip()
 
                 if key not in valid_keys.keys():
-                    raise ParserError(f"Unknown key in {self.file_name} at line {self._ln}")
+                    raise ParserError(
+                        f"Unknown key in {self.file_name} at line {self.ln}")
 
                 if key in stack_keys:
-                    raise ParserError(f"Duplicated key: {key} in line: {self._ln}")
+                    raise ParserError(
+                        f"Duplicated key: {key} in line: {self.ln}")
 
                 stack_keys.append(key)
 
@@ -125,38 +131,50 @@ class Parser:
                 if key == "nb_drones":
                     if self.start_hub is not None or len(self.hubs) != 0 \
                         or self.end_hub is not None \
-                        or len(self.connections) != 0:
+                            or len(self.connections) != 0:
                         raise ParserError("nb_drones not in first line")
                     config = valid_keys[key].converter(value)
                     self.nb_drones = config
 
                 elif key == "start_hub":
-                    if self.start_hub != None:
-                        raise ParserError(f"Duplicate start_hub in line {self._ln}")
+                    if self.start_hub is not None:
+                        raise ParserError(
+                            f"Duplicate start_hub in line {self.ln}")
                     else:
                         config = valid_keys[key].converter(value)
-                        self.start_hub = Hub(config["name"], config["coordinate"], config["meta_data"])
+                        self.start_hub = Hub(
+                            config["name"],
+                            config["coordinate"],
+                            config["meta_data"]
+                            )
 
                 elif key == "hub":
                     config = valid_keys[key].converter(value)
-                    self.hubs.append(Hub(config["name"], config["coordinate"], config["meta_data"]))
+                    self.hubs.append(Hub(config["name"],
+                                         config["coordinate"],
+                                         config["meta_data"]))
 
                 elif key == "end_hub":
-                    if self.end_hub != None:
-                        raise ParserError(f"Duplicate end_hub in line {self._ln}")
+                    if self.end_hub is not None:
+                        raise ParserError(
+                            f"Duplicate end_hub in line {self.ln}")
                     else:
                         config = valid_keys[key].converter(value)
-                        self.end_hub = Hub(config["name"], config["coordinate"], config["meta_data"])
+                        self.end_hub = Hub(config["name"],
+                                           config["coordinate"],
+                                           config["meta_data"])
 
                 elif key == "connection":
                     config = valid_keys[key].converter(value)
                     if "meta_data" in config:
                         self.connections.append(
-                            Connection(config["connections"], config["meta_data"]))
+                            Connection(config["connections"],
+                                       config["meta_data"]))
                     else:
-                        self.connections.append(Connection(config["connections"]))
+                        self.connections.append(
+                            Connection(config["connections"]))
 
-                self._ln += 1
+                self.ln += 1
 
             self.__check_hubs_names()
             self.__check_hubs_coordinates()
@@ -168,7 +186,8 @@ class Parser:
         stack_names.append(self.end_hub.name)
 
         if self.start_hub.name == self.end_hub.name:
-            raise ParserError(f"Hub with duplicated name: {self.start_hub.name}")
+            raise ParserError(
+                f"Hub with duplicated name: {self.start_hub.name}")
 
         for hub in self.hubs:
             if hub.name in stack_names:
@@ -205,9 +224,8 @@ class Parser:
             if b not in hubs_names:
                 raise ParserError(f"Connection: {b} not in hubs names")
 
-
             if c.connection in previus_connections \
-                or c.connection in previus_reverse_connections:
+                    or c.connection in previus_reverse_connections:
                 raise ParserError(f"Duplicated connection: {c.connection}")
 
             previus_connections.append(tuple((a, b)))

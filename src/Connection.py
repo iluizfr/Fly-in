@@ -8,20 +8,23 @@ class ConectionError(Exception):
 
 
 class Connection:
-    def __init__(self, connection: tuple[Hub, Hub], meta_data: Optional[str] = None) -> None:
+    def __init__(self, connection: tuple[Hub, Hub],
+                 meta_data: Optional[str] = None) -> None:
         self.connection: tuple[Hub, Hub] = connection
         self.meta_data: dict[str, Any] = self.__check_meta_data(meta_data)
         self.max_capacity = self.meta_data["max_link_capacity"]
         self.drones: list[Drone] = []
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         a, b = self.connection
         return f"Connection: {a.name}, {b.name}"
 
     def has_space(self) -> bool:
-        return len(self.drones) < self.max_capacity
+        has_space = len(self.drones) < self.max_capacity
 
-    def __check_meta_data(self, meta_data: str) -> dict:
+        return bool(has_space)
+
+    def __check_meta_data(self, meta_data: str | None) -> dict:
         keys = ["max_link_capacity"]
         new_meta_data: dict[str, Any] = {}
 
@@ -44,7 +47,8 @@ class Connection:
             if key == "max_link_capacity":
                 new_meta_data[key] = int(value)
                 if new_meta_data[key] < 0:
-                    raise ConectionError(f"Values for '{key}' must be positive'")
+                    raise ConectionError(
+                        f"Values for '{key}' must be positive'")
 
         return new_meta_data
 
@@ -56,4 +60,5 @@ class Connection:
         return True
 
     def leave(self, drone: Drone) -> None:
-        self.drones.remove(drone)
+        if drone in self.drones:
+            self.drones.remove(drone)

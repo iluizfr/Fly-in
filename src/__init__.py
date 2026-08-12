@@ -10,4 +10,4 @@ from .Menu import Menu
 
 __all__ = ["Parser", "ParserError", "Graph", "Hub",
            "Connection", "HubError", "Drone", 'ConectionError',
-           "Simulator", "Connection", "Menu"]
+           "Simulator", "Connection", "Menu", "Renderer"]

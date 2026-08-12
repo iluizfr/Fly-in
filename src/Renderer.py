@@ -1,9 +1,11 @@
 from .Simulator import Simulator
 import pygame
+import webcolors
+from .Hub import Hub
 
 
 class Renderer:
-    def __init__(self, simulator: Simulator):
+    def __init__(self, simulator: Simulator) -> None:
         self.simulator = simulator
         self.scale = 100
         self.hub_size = 20
@@ -15,7 +17,7 @@ class Renderer:
 
         self.running = True
 
-    def draw(self):
+    def draw(self) -> None:
         self.screen.fill((30, 30, 30))
 
         font = pygame.font.Font(None, 22)
@@ -27,14 +29,22 @@ class Renderer:
             x1, y1 = self.pos(hub_a)
             x2, y2 = self.pos(hub_b)
 
-            pygame.draw.line(self.screen, (255, 255, 255), (x1, y1), (x2, y2), 4)
+            pygame.draw.line(
+                self.screen,
+                (255, 255, 255),
+                (x1, y1), (x2, y2),
+                4
+                )
 
             for drone in connection.drones:
 
                 x = x1 - x2
-                y =  y1 - y2
+                y = y1 - y2
 
-                pygame.draw.circle(self.screen, (255, 0, 0), (x, y), self.drone_size)
+                pygame.draw.circle(self.screen,
+                                   (255, 0, 0), (x, y),
+                                   self.drone_size
+                                   )
 
                 text = font.render(drone.id, True, self.collor("black"))
                 text_rec = text.get_rect(center=(x, y))
@@ -58,7 +68,10 @@ class Renderer:
 
             x, y = self.pos(drone.current_hub)
 
-            pygame.draw.circle(self.screen, (255, 0, 0), (x, y), self.drone_size)
+            pygame.draw.circle(self.screen,
+                               (255, 0, 0), (x, y),
+                               self.drone_size
+                               )
 
             text = font.render(drone.id, True, self.collor("black"))
             text_rec = text.get_rect(center=(x, y))
@@ -66,46 +79,35 @@ class Renderer:
 
         pygame.display.flip()
 
-    def update(self):
+    def update(self) -> None:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 self.running = False
 
     @staticmethod
     def collor(collor: str) -> tuple[int, int, int]:
-        collors = {
-            "green": (0, 255, 00),
-            "red": (255, 0, 0),
-            "blue": (0, 0, 255),
-            "black": (0, 0, 0),
-            "white": (255, 255, 255),
-            "yellow": (255, 255, 0),
-            "orange": (250, 165, 0),
-            "gray": (128, 128, 128),
-            "brown": (139, 69, 19),
-            "pink": (255, 192, 203),
-            "cyan": (0, 255, 255),
-            "purple": (128, 0, 128),
-            "gold": (255, 215, 0),
-            "lime": (50, 205, 50),
-            "magenta": (255, 0, 255)
-        }
-
         collor = collor.lower()
 
-        if collor not in collors:
-            return collors["white"]
+        if collor == "rainbow":
+            return (23, 34, 98)
 
-        return collors[collor]
+        cor = webcolors.name_to_rgb(collor)
+        rgb = (cor.red, cor.green, cor.blue)
+
+        return rgb
 
     def pos(self, hub: Hub) -> tuple[int, int]:
         scale = self.scale
 
-        min_x = min(h.pos[0] for h in self.simulator.class_graph.hub_by_name.values())
-        max_x = max(h.pos[0] for h in self.simulator.class_graph.hub_by_name.values())
+        min_x = min(
+            h.pos[0] for h in self.simulator.class_graph.hub_by_name.values())
+        max_x = max(
+            h.pos[0] for h in self.simulator.class_graph.hub_by_name.values())
 
-        min_y = min(h.pos[1] for h in self.simulator.class_graph.hub_by_name.values())
-        max_y = max(h.pos[1] for h in self.simulator.class_graph.hub_by_name.values())
+        min_y = min(
+            h.pos[1] for h in self.simulator.class_graph.hub_by_name.values())
+        max_y = max(
+            h.pos[1] for h in self.simulator.class_graph.hub_by_name.values())
 
         width = (max_x - min_x) * scale
         height = (max_y - min_y) * scale

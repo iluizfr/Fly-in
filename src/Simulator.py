@@ -19,7 +19,8 @@ class Simulator:
             drone.current_connection = None
             drone.destination_hub = None
             drone.just_arrived = False
-            drone.path = self.class_graph.dijkstra(self.start_hub, self.end_hub)
+            drone.path = self.class_graph.dijkstra(
+                self.start_hub, self.end_hub)
             self.start_hub.drones.append(drone)
 
     def __repr__(self) -> str:
@@ -35,8 +36,8 @@ class Simulator:
         for drone in self.drones:
             if (
                 drone.current_connection is not None
-                and drone.remaining_turns == 0
-                ):
+                    and drone.remaining_turns == 0):
+
                 self.finish_restricted_move(drone)
                 drone.just_arrived = True
 
@@ -63,16 +64,16 @@ class Simulator:
             if self.move_drone(drone):
                 printed = True
 
-            #if drone in self.end_hub.drones:
-                #self.delivered_drones.append(drone)
-                #self.end_hub.drones.remove(drone)
-                #self.drones.remove(drone)
+            # if drone in self.end_hub.drones:
+                # self.delivered_drones.append(drone)
+                # self.end_hub.drones.remove(drone)
+                # self.drones.remove(drone)
 
         return printed
 
     def move_drone(self, drone: Drone) -> bool:
-        current_hub = drone.path[0]
-        next_hub = drone.path[1]
+        current_hub: Hub = drone.path[0]
+        next_hub: Hub = drone.path[1]
 
         connection = self.get_next_connection(current_hub, next_hub)
 
@@ -92,7 +93,8 @@ class Simulator:
 
         return self.normal_move(drone, current_hub, next_hub, connection)
 
-    def get_next_connection(self, current_hub: Hub, next_hub: Hub):
+    def get_next_connection(self, current_hub: Hub,
+                            next_hub: Hub) -> Connection | None:
         return self.class_graph.get_connection(current_hub, next_hub)
 
     def normal_move(self, drone: Drone, current_hub: Hub,
@@ -123,11 +125,13 @@ class Simulator:
     def finish_restricted_move(self, drone: Drone) -> None:
         connection = drone.current_connection
 
-        connection.leave(drone)
+        if connection is not None:
+            connection.leave(drone)
 
         destination = drone.destination_hub
 
-        destination.drones.append(drone)
+        if destination is not None:
+            destination.drones.append(drone)
 
         drone.current_hub = destination
         drone.current_connection = None
