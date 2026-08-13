@@ -7,7 +7,8 @@ class HubError(Exception):
 
 
 class Hub:
-    def __init__(self, name: str, pos: tuple, meta_data: str) -> None:
+    def __init__(self, name: str, pos: tuple[int, int],
+                 meta_data: str) -> None:
         self.name: str = name
         self.pos: tuple[int, int] = pos
         self.meta_data: dict[str, Any] = self.__check_meta_data(meta_data)
@@ -19,7 +20,7 @@ class Hub:
     def __repr__(self) -> str:
         return self.name
 
-    def __check_meta_data(self, meta_data: str) -> dict:
+    def __check_meta_data(self, meta_data: str) -> dict[str, Any]:
         keys = ["color", "max_drones", "zone"]
         valid_zones = ["normal", "blocked", "restricted", "priority"]
         new_meta_data: dict[str, Any] = {}

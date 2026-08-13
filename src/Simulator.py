@@ -14,6 +14,7 @@ class Simulator:
         self.graph: dict[Hub, list[Hub]] = graph.dict_graph
         self.current_turn = 0
 
+        # initialize drones values and give a start path for all
         for drone in self.drones:
             drone.current_hub = self.start_hub
             drone.current_connection = None
@@ -107,7 +108,10 @@ class Simulator:
 
         drone.current_hub = next_hub
 
-        print(f"{drone.id}-{next_hub.name}", end=" ")
+        grn = "\033[32m"
+        en = "\033[0m"
+
+        print(f"{grn}{drone.id}-{next_hub.name}{en}", end=" ")
         return True
 
     def start_restricted_move(self, drone: Drone, current_hub: Hub,
@@ -120,7 +124,11 @@ class Simulator:
         drone.destination_hub = next_hub
         drone.remaining_turns = 1
 
-        print(f"{drone.id}-{current_hub.name}-{next_hub.name}", end=" ")
+        bky = "\033[33m"
+        en = "\033[0m"
+
+        print(
+            f"{bky}{drone.id}-{current_hub.name}-{next_hub.name}{en}", end=" ")
         return True
 
     def finish_restricted_move(self, drone: Drone) -> None:

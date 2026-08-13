@@ -15,7 +15,7 @@ class Menu:
         print("Fly-in")
 
         print("\nChoose difficult:")
-        print("challenger\neasy\nhard\nmedium")
+        print("easy\nmedium\nhard\nchallenger")
         dif = input("\nchoice: ")
 
         if dif == "easy":

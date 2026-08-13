@@ -1,5 +1,9 @@
-from src.Hub import Hub
-from src.Connection import Connection
+from typing import TYPE_CHECKING
+
+
+if TYPE_CHECKING:
+    from .Hub import Hub
+    from .Connection import Connection
 
 
 class Drone:

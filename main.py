@@ -35,8 +35,9 @@ def main() -> None:
         print(f"\nTurnos: {simulator.current_turn}")
         print("=" * 20)
 
-    except (ParserError, ValueError, HubError, ConectionError) as error:
-        print(f"Error: {error}")
+    except (ParserError, ValueError, HubError, ConectionError,
+            PermissionError, FileNotFoundError) as error:
+        print(error)
         sys.exit(1)
 
 

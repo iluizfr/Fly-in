@@ -17,8 +17,8 @@ class NumericProcessor(Processor):
     @staticmethod
     def validate(value: str) -> int:
         new_value = int(value)
-        if new_value < 0:
-            raise ValueError("Parsing: No negative nb_drones allowed")
+        if new_value <= 0:
+            raise ValueError("Parsing: nb_drones must be bigger than 0")
         return new_value
 
 
@@ -92,6 +92,8 @@ class Parser:
 
     def set_config(self) -> None:
         stack_keys: list[str] = []
+        stack_names: list[str] = []
+        stack_coordinate: list[tuple[int, int]] = []
         valid_keys: dict[str, Any] = {"nb_drones": NumericProcessor(),
                                       "start_hub": HubProcessor(),
                                       "hub": HubProcessor(),
@@ -99,14 +101,24 @@ class Parser:
                                       "connection": ConnectionProcessor()}
 
         with open(self.file_name, "r") as file:
+            empty = file
+
+            # Check if the file is empty
+            if not empty.read().strip():
+                raise ParserError(f"Parser: Empty file '{self.file_name}'")
+
+            # Comeback for the beginning of the line
+            file.seek(0)
 
             for line in file:
-
                 line = line.strip()
+
+                # Skip empty lines and comentaries
                 if not line or line.startswith("#"):
                     self.ln += 1
                     continue
 
+                # Valid lines have ":"
                 elif ":" not in line:
                     raise ParserError(
                         f"Syntax: {self.file_name} line {self.ln} missing ':'")
@@ -115,57 +127,103 @@ class Parser:
                 key = key.strip()
                 value = value.strip()
 
+                # Check if the key is valid
                 if key not in valid_keys.keys():
                     raise ParserError(
-                        f"Unknown key in {self.file_name} at line {self.ln}")
+                        f"Parser: Unknown key in '{key}' in line {self.ln}")
 
+                # Check repeated key
                 if key in stack_keys:
-                    raise ParserError(
-                        f"Duplicated key: {key} in line: {self.ln}")
+                    if key == "hub" or key == "connection":
+                        pass
+                    else:
+                        raise ParserError(
+                            f"Duplicated key: '{key}' in line: {self.ln}")
 
                 stack_keys.append(key)
 
-                if key == "hub" or key == "connection":
-                    stack_keys.remove(key)
-
+                # Number of Drones
                 if key == "nb_drones":
                     if self.start_hub is not None or len(self.hubs) != 0 \
                         or self.end_hub is not None \
                             or len(self.connections) != 0:
-                        raise ParserError("nb_drones not in first line")
+                        raise ParserError(
+                            "Parser: nb_drones not in first valid line")
                     config = valid_keys[key].converter(value)
                     self.nb_drones = config
 
+                # Start Hub
                 elif key == "start_hub":
                     if self.start_hub is not None:
                         raise ParserError(
                             f"Duplicate start_hub in line {self.ln}")
                     else:
                         config = valid_keys[key].converter(value)
+
+                        if config["name"] in stack_names:
+                            raise ParserError(
+                                f"Duplicated start_hub name in line {self.ln}")
+
+                        if config["coordinate"] in stack_coordinate:
+                            raise ParserError(
+                                f"Duplicated coordinate in line {self.ln}"
+                            )
+
                         self.start_hub = Hub(
                             config["name"],
                             config["coordinate"],
                             config["meta_data"]
                             )
+                        stack_names.append(config["name"])
+                        stack_coordinate.append(config["coordinate"])
 
+                # Hub
                 elif key == "hub":
                     config = valid_keys[key].converter(value)
+
+                    if config["name"] in stack_names:
+                        raise ParserError(
+                            f"Duplicated hub name in line {self.ln}")
+
+                    if config["coordinate"] in stack_coordinate:
+                        raise ParserError(
+                            f"Duplicated coordinate in line {self.ln}"
+                        )
+
                     self.hubs.append(Hub(config["name"],
                                          config["coordinate"],
                                          config["meta_data"]))
 
+                    stack_names.append(config["name"])
+                    stack_coordinate.append(config["coordinate"])
+
+                # End Hub
                 elif key == "end_hub":
                     if self.end_hub is not None:
                         raise ParserError(
                             f"Duplicate end_hub in line {self.ln}")
                     else:
                         config = valid_keys[key].converter(value)
+
+                        if config["name"] in stack_names:
+                            raise ParserError(
+                                f"Duplicated end_hub name in line {self.ln}")
+
+                        if config["coordinate"] in stack_coordinate:
+                            raise ParserError(
+                                f"Duplicated coordinate in line {self.ln}"
+                            )
+
                         self.end_hub = Hub(config["name"],
                                            config["coordinate"],
                                            config["meta_data"])
+                        stack_names.append(config["name"])
+                        stack_coordinate.append(config["coordinate"])
 
+                # Connection
                 elif key == "connection":
                     config = valid_keys[key].converter(value)
+
                     if "meta_data" in config:
                         self.connections.append(
                             Connection(config["connections"],
@@ -176,44 +234,12 @@ class Parser:
 
                 self.ln += 1
 
-            self.__check_hubs_names()
-            self.__check_hubs_coordinates()
-            self.__check_connections()
+        for key in valid_keys.keys():
+            if key not in stack_keys:
+                raise ParserError(f"Parser: Missing key '{key}'")
 
-    def __check_hubs_names(self) -> None:
-        stack_names: list[str] = []
-
-        if self.start_hub is not None and self.end_hub is not None:
-            stack_names.append(self.start_hub.name)
-            stack_names.append(self.end_hub.name)
-
-        if self.start_hub is not None \
-                and self.end_hub is not None \
-                and self.start_hub.name == self.end_hub.name:
-            raise ParserError(
-                f"Hub with duplicated name: {self.start_hub.name}")
-
-        for hub in self.hubs:
-            if hub is not None and hub.name in stack_names:
-                raise ParserError(f"Hub with duplicated name: {hub.name}")
-            stack_names.append(hub.name)
-
-    def __check_hubs_coordinates(self) -> None:
-        stack_coordinate: list[tuple[int, int]] = []
-
-        if self.start_hub is not None and self.end_hub is not None:
-            stack_coordinate.append(self.start_hub.pos)
-            stack_coordinate.append(self.end_hub.pos)
-
-        if self.start_hub is not None \
-                and self.end_hub is not None \
-                and self.start_hub.pos == self.end_hub.pos:
-            raise ParserError(f"Hub duplicated coordinate: {self.end_hub.pos}")
-
-        for hub in self.hubs:
-            if hub.pos in stack_coordinate:
-                raise ParserError(f"Hub with duplicated coordinate: {hub.pos}")
-            stack_coordinate.append(hub.pos)
+        # Extra security
+        self.__check_connections()
 
     def __check_connections(self) -> None:
         previus_connections = []
@@ -228,6 +254,9 @@ class Parser:
 
         for c in self.connections:
             a, b = c.connection
+
+            if a == b:
+                raise ParserError(f"Connection: Wrong connection '{a}-{b}'")
 
             if a not in hubs_names:
                 raise ParserError(f"Connection: {a} not in hubs names")

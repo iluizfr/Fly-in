@@ -1,5 +1,4 @@
 from typing import Optional, Any
-from .Hub import Hub
 from .Drone import Drone
 
 
@@ -8,23 +7,24 @@ class ConectionError(Exception):
 
 
 class Connection:
-    def __init__(self, connection: tuple[Hub, Hub],
+    def __init__(self, connection: tuple[Any, Any],
                  meta_data: Optional[str] = None) -> None:
-        self.connection: tuple[Hub, Hub] = connection
+
+        self.connection: tuple[Any, Any] = connection
         self.meta_data: dict[str, Any] = self.__check_meta_data(meta_data)
         self.max_capacity = self.meta_data["max_link_capacity"]
         self.drones: list[Drone] = []
 
     def __repr__(self) -> str:
         a, b = self.connection
-        return f"Connection: {a.name}, {b.name}"
+        return f"Connection: {a}, {b}"
 
     def has_space(self) -> bool:
         has_space = len(self.drones) < self.max_capacity
 
         return bool(has_space)
 
-    def __check_meta_data(self, meta_data: str | None) -> dict:
+    def __check_meta_data(self, meta_data: str | None) -> dict[str, Any]:
         keys = ["max_link_capacity"]
         new_meta_data: dict[str, Any] = {}
 

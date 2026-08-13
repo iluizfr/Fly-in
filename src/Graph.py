@@ -1,8 +1,9 @@
-from .Hub import Hub
 from .Connection import Connection
-from .Drone import Drone
-from .Parser import Parser
 from collections import deque
+from .Parser import Parser
+from .Drone import Drone
+from typing import Any
+from .Hub import Hub
 import heapq
 
 
@@ -14,9 +15,11 @@ class Graph():
         self.connections: list[Connection] = parser.connections
         self.end_hub: Hub | None = parser.end_hub
         self.drones: list[Drone] = []
+        self.hub_by_name: dict[str, Hub] = {}
 
+        # hub_by_name basically a dict to get a hub object by its name
         if self.start_hub is not None and self.end_hub is not None:
-            self.hub_by_name: dict[str, Hub] = {
+            self.hub_by_name = {
                 self.start_hub.name: self.start_hub,
                 self.end_hub.name: self.end_hub
             }
@@ -26,6 +29,16 @@ class Graph():
 
         self.dict_graph: dict[Hub, list[Hub]] = self.__set_dict_graph()
 
+        # Check if has a valid way from start to the end
+        self.is_valid: bool = True if len(self.bfs(
+            self.start_hub, self.end_hub)) != 0 else False
+
+        if not self.is_valid:
+            file = parser.file_name
+            raise ValueError(
+                f"{file} not valid. Drones can't find a way to the end")
+
+        # initialize drones
         self.__generate_drones()
 
     def __repr__(self) -> str:
@@ -56,7 +69,7 @@ class Graph():
             self.drones.append(drone)
             drone_id += 1
 
-    def bfs(self, start: Hub, end: Hub) -> list[Hub]:
+    def bfs(self, start: Any, end: Any) -> list[Hub]:
         queue = deque([start])
         visited: set[Hub] = {start}
         father: dict[Hub, Hub] = {}
@@ -94,10 +107,12 @@ class Graph():
 
     def dijkstra(self, start: Hub | None, end: Hub | None) -> list[Hub]:
         distances = {hub: float("inf") for hub in self.dict_graph}
+        previous: dict[Hub | None, Hub | None] = {}
         previous = {hub: None for hub in self.dict_graph}
 
-        distances[start] = 0
-        queue = [(0, start.name, start)]
+        if start is not None:
+            distances[start] = 0
+            queue = [(0, start.name, start)]
 
         while queue:
             current_distance, _, current = heapq.heappop(queue)
@@ -146,23 +161,6 @@ class Graph():
                 return connection
 
         return None
-
-    def hubs_info(self) -> None:
-        print("start_hub:")
-        print(f"    name: {self.start_hub.name}")
-        print(f"    pos: {self.start_hub.pos}")
-        print(f"    meta data: {self.start_hub.meta_data}\n")
-
-        print("Hubs:")
-        for hub in self.hubs:
-            print(f"    name: {hub.name}")
-            print(f"    pos: {hub.pos}")
-            print(f"    meta data: {hub.meta_data}\n")
-
-        print("end_hub:")
-        print(f"    name: {self.end_hub.name}")
-        print(f"    pos: {self.end_hub.pos}")
-        print(f"    meta data: {self.end_hub.meta_data}\n")
 
     def drones_info(self) -> None:
         print(f"Number of drones: {self.nb_drones}")

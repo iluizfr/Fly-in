@@ -1,10 +1,11 @@
-1 - Review parse
-2 - Review algorithm
-3 - Finish the Renderer classe
-4 - Test bench marks
-5 - Review errors in all the project
-6 - Makefile
-7 - Requirements
-8 - Errors mypy and Flake8
+1 - Review parse >
+2 - Review algorithm >
+3 - Finish the Renderer classe >>
+4 - Test bench marks >>
+5 - Review errors in all the project >>
+6 - Makefile >>
+7 - Requirements >>
+8 - Errors mypy and Flake8 >>
 9 - Docstrings
-10 - Erase methods and strings that are not beeig used
+10 - Erase methods and variables that are not beeig used >>
+11 - README
