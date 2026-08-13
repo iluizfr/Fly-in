@@ -9,16 +9,17 @@ import heapq
 class Graph():
     def __init__(self, parser: Parser) -> None:
         self.nb_drones: int = parser.nb_drones
-        self.start_hub: Hub = parser.start_hub
+        self.start_hub: Hub | None = parser.start_hub
         self.hubs: list[Hub] = parser.hubs
         self.connections: list[Connection] = parser.connections
-        self.end_hub: Hub = parser.end_hub
+        self.end_hub: Hub | None = parser.end_hub
         self.drones: list[Drone] = []
 
-        self.hub_by_name: dict[str, Hub] = {
-            self.start_hub.name: self.start_hub,
-            self.end_hub.name: self.end_hub
-        }
+        if self.start_hub is not None and self.end_hub is not None:
+            self.hub_by_name: dict[str, Hub] = {
+                self.start_hub.name: self.start_hub,
+                self.end_hub.name: self.end_hub
+            }
 
         for hub in self.hubs:
             self.hub_by_name[hub.name] = hub
@@ -91,7 +92,7 @@ class Graph():
 
         return path
 
-    def dijkstra(self, start: Hub, end: Hub) -> list[Hub]:
+    def dijkstra(self, start: Hub | None, end: Hub | None) -> list[Hub]:
         distances = {hub: float("inf") for hub in self.dict_graph}
         previous = {hub: None for hub in self.dict_graph}
 

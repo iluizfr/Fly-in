@@ -8,8 +8,8 @@ class Simulator:
     def __init__(self, graph: Graph) -> None:
         self.class_graph: Graph = graph
         self.drones: list[Drone] = graph.drones
-        self.start_hub: Hub = graph.start_hub
-        self.end_hub: Hub = graph.end_hub
+        self.start_hub: Hub | None = graph.start_hub
+        self.end_hub: Hub | None = graph.end_hub
         self.delivered_drones: list[Drone] = []
         self.graph: dict[Hub, list[Hub]] = graph.dict_graph
         self.current_turn = 0
@@ -21,7 +21,8 @@ class Simulator:
             drone.just_arrived = False
             drone.path = self.class_graph.dijkstra(
                 self.start_hub, self.end_hub)
-            self.start_hub.drones.append(drone)
+            if self.start_hub is not None:
+                self.start_hub.drones.append(drone)
 
     def __repr__(self) -> str:
         return "Simulator"
@@ -55,7 +56,7 @@ class Simulator:
             if len(drone.path) < 2 and drone.path is not None:
                 self.delivered_drones.append(drone)
 
-                if drone in self.end_hub.drones:
+                if self.end_hub is not None and drone in self.end_hub.drones:
                     self.end_hub.drones.remove(drone)
 
                 self.drones.remove(drone)

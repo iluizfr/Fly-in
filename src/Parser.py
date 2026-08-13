@@ -182,24 +182,32 @@ class Parser:
 
     def __check_hubs_names(self) -> None:
         stack_names: list[str] = []
-        stack_names.append(self.start_hub.name)
-        stack_names.append(self.end_hub.name)
 
-        if self.start_hub.name == self.end_hub.name:
+        if self.start_hub is not None and self.end_hub is not None:
+            stack_names.append(self.start_hub.name)
+            stack_names.append(self.end_hub.name)
+
+        if self.start_hub is not None \
+                and self.end_hub is not None \
+                and self.start_hub.name == self.end_hub.name:
             raise ParserError(
                 f"Hub with duplicated name: {self.start_hub.name}")
 
         for hub in self.hubs:
-            if hub.name in stack_names:
+            if hub is not None and hub.name in stack_names:
                 raise ParserError(f"Hub with duplicated name: {hub.name}")
             stack_names.append(hub.name)
 
     def __check_hubs_coordinates(self) -> None:
         stack_coordinate: list[tuple[int, int]] = []
-        stack_coordinate.append(self.start_hub.pos)
-        stack_coordinate.append(self.end_hub.pos)
 
-        if self.start_hub.pos == self.end_hub.pos:
+        if self.start_hub is not None and self.end_hub is not None:
+            stack_coordinate.append(self.start_hub.pos)
+            stack_coordinate.append(self.end_hub.pos)
+
+        if self.start_hub is not None \
+                and self.end_hub is not None \
+                and self.start_hub.pos == self.end_hub.pos:
             raise ParserError(f"Hub duplicated coordinate: {self.end_hub.pos}")
 
         for hub in self.hubs:
@@ -213,8 +221,10 @@ class Parser:
         hubs_names: list[str] = []
 
         hubs_names = [hub.name for hub in self.hubs]
-        hubs_names.append(self.start_hub.name)
-        hubs_names.append(self.end_hub.name)
+
+        if self.start_hub is not None and self.end_hub is not None:
+            hubs_names.append(self.start_hub.name)
+            hubs_names.append(self.end_hub.name)
 
         for c in self.connections:
             a, b = c.connection
@@ -230,26 +240,3 @@ class Parser:
 
             previus_connections.append(tuple((a, b)))
             previus_reverse_connections.append(tuple((b, a)))
-
-    def display_parser(self) -> None:
-        print(f"nb_drone: {self.nb_drones}\n")
-        print("start_hub:")
-        print(f"    name: {self.start_hub.name}")
-        print(f"    pos: {self.start_hub.pos}")
-        print(f"    meta data: {self.start_hub.meta_data}\n")
-
-        print("Hubs:")
-        for hub in self.hubs:
-            print(f"    name: {hub.name}")
-            print(f"    pos: {hub.pos}")
-            print(f"    meta data: {hub.meta_data}\n")
-
-        print("end_hub:")
-        print(f"    name: {self.end_hub.name}")
-        print(f"    pos: {self.end_hub.pos}")
-        print(f"    meta data: {self.end_hub.meta_data}\n")
-
-        print("Connections:")
-        for connection in self.connections:
-            print(f"    Connection: {connection.connection}")
-            print(f"    meta data: {connection.meta_data}\n")
