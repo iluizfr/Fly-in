@@ -5,17 +5,45 @@ from .Hub import Hub
 
 
 class Processor(ABC):
+    """
+    Base class for processors responsible for converting configuration values.
+
+    Subclasses must implement the converter method to transform a string value
+    into the appropriate data type or structure.
+    """
+
     @abstractmethod
     def converter(self, value: str) -> Any:
+        """
+        Converts a string value into the expected data type or structure.
+        """
         pass
 
 
 class NumericProcessor(Processor):
+    """
+    Processes numeric configuration values.
+
+    This processor converts string values into positive integers and raises
+    an error when the resulting value is not greater than zero.
+    """
+
     def converter(self, value: str) -> int:
+        """
+        Converts a string value into a positive integer.
+
+        The value is validated before being returned.
+        """
         return self.validate(value)
 
     @staticmethod
     def validate(value: str) -> int:
+        """
+        Validates and converts a string value into a positive integer.
+
+        Raises an error if the value cannot be converted to an integer or
+        if the resulting number is less than or equal to zero.
+        """
         new_value = int(value)
         if new_value <= 0:
             raise ValueError("Parsing: nb_drones must be bigger than 0")
@@ -23,7 +51,20 @@ class NumericProcessor(Processor):
 
 
 class HubProcessor(Processor):
+    """
+    Processes hub configuration values.
+
+    This processor parses a hub definition and extracts its name, coordinates,
+    and optional metadata into a dictionary.
+    """
+
     def converter(self, value: str) -> Any:
+        """
+        Parses a hub configuration string into a dictionary.
+
+        The resulting dictionary contains the hub name, its coordinates,
+        and any additional metadata provided in the configuration.
+        """
         hub: dict[str, Any] = {}
         pre_check: list[str] = value.split()
 
@@ -51,7 +92,20 @@ class HubProcessor(Processor):
 
 
 class ConnectionProcessor(Processor):
+    """
+    Processes connection configuration values.
+
+    This processor parses a connection definition and extracts the names of
+    the connected hubs along with any optional metadata.
+    """
+
     def converter(self, value: str) -> dict[str, Any]:
+        """
+        Parses a connection configuration string into a dictionary.
+
+        The connection is represented by the names of the two connected hubs.
+        Optional metadata is also included when provided.
+        """
         connection: dict[str, Any] = {}
 
         if "-" not in value:
@@ -73,11 +127,32 @@ class ConnectionProcessor(Processor):
 
 
 class ParserError(Exception):
+    """
+    Represents an error raised while parsing or validating the configuration.
+
+    This exception is used when the configuration file contains invalid
+    syntax, duplicated values, missing values, or invalid connections.
+    """
     pass
 
 
 class Parser:
+    """
+    Parses and validates a configuration file.
+
+    The parser reads the configuration file, processes each supported entry,
+    and creates the corresponding hubs and connections. It also validates
+    the configuration to ensure that required values are present and that
+    hubs and connections do not contain invalid or duplicated data.
+    """
+
     def __init__(self, file_name: str) -> None:
+        """
+        Initializes the parser with the path of the configuration file.
+
+        The configuration is automatically parsed and validated during
+        initialization.
+        """
         self.connections: list[Connection] = []
         self.file_name: str = file_name
         self.start_hub: Hub | None = None
@@ -88,9 +163,19 @@ class Parser:
         self.set_config()
 
     def __repr__(self) -> str:
+        """
+        Returns a string representation of the parser instance.
+        """
         return "Parser"
 
     def set_config(self) -> None:
+        """
+        Reads and processes the configuration file.
+
+        Each valid configuration entry is parsed using its corresponding
+        processor. The method creates the configured hubs and connections,
+        validates required entries, and performs a final connection check.
+        """
         stack_keys: list[str] = []
         stack_names: list[str] = []
         stack_coordinate: list[tuple[int, int]] = []
@@ -242,6 +327,12 @@ class Parser:
         self.__check_connections()
 
     def __check_connections(self) -> None:
+        """
+        Validates all connections defined in the configuration.
+
+        Checks that connections reference existing hubs, do not connect a hub
+        to itself, and are not duplicated or defined in reverse order.
+        """
         previus_connections = []
         previus_reverse_connections = []
         hubs_names: list[str] = []

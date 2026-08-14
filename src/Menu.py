@@ -2,15 +2,36 @@ import os
 
 
 class Menu:
+    """
+    Handles the initial configuration of the simulation.
+
+    The menu allows the user to select a difficulty level and a map. It also
+    configures the visual scale and the size of drones and hubs according to
+    the selected difficulty.
+    """
+
     def __init__(self) -> None:
+        """
+        Initializes the menu with the default display settings.
+        """
         self.scale = 100
         self.drone_size = 8
         self.hub_size = 20
 
     def __repr__(self) -> str:
+        """
+        Returns a string representation of the menu.
+        """
         return "Menu"
 
     def display(self) -> str:
+        """
+        Displays the menu and handles the user's configuration choices.
+
+        The user selects a difficulty level and a map from the available
+        options. The display settings are adjusted according to the selected
+        difficulty, and the path to the selected map is returned.
+        """
         print("=" * 20)
         print("Fly-in")
 
@@ -53,4 +74,10 @@ class Menu:
         return f"maps/{dif}/{mapa}"
 
     def get_info(self) -> tuple[int, int, int]:
+        """
+        Returns the current display configuration.
+
+        The returned values contain the map scale, hub size, and drone size
+        configured by the selected difficulty and map.
+        """
         return (self.scale, self.hub_size, self.drone_size)

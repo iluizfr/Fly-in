@@ -5,7 +5,22 @@ from .Hub import Hub
 
 
 class Simulator:
+    """
+    Manages the drone simulation and its movement through the graph.
+
+    The simulator controls the state of all drones, determines their routes,
+    processes each simulation turn, and handles movement through normal and
+    restricted hubs until the drones reach their destination.
+    """
+
     def __init__(self, graph: Graph) -> None:
+        """
+        Initializes the simulator using the provided graph.
+
+        Each drone is placed at the starting hub and receives an initial path
+        to the destination. The simulator also initializes the state required
+        to track drone movements and completed deliveries.
+        """
         self.class_graph: Graph = graph
         self.drones: list[Drone] = graph.drones
         self.start_hub: Hub | None = graph.start_hub
@@ -26,9 +41,20 @@ class Simulator:
                 self.start_hub.drones.append(drone)
 
     def __repr__(self) -> str:
+        """
+        Returns a string representation of the simulator.
+        """
         return "Simulator"
 
     def simulate_turn(self) -> None:
+        """
+        Processes one turn of the drone simulation.
+
+        The method updates the remaining movement time of drones, completes
+        restricted movements, recalculates routes, and attempts to move each
+        active drone toward its destination. Drones that reach the destination
+        are removed from the active simulation and stored as delivered drones.
+        """
         printed = False
 
         for drone in self.drones:
@@ -72,6 +98,14 @@ class Simulator:
             print()
 
     def move_drone(self, drone: Drone) -> bool:
+        """
+        Attempts to move a drone to the next hub in its current path.
+
+        The method checks whether the next connection exists and whether the
+        destination hub and connection have available capacity. Restricted
+        hubs are handled separately because entering them requires multiple
+        turns to complete the movement.
+        """
         current_hub: Hub = drone.path[0]
         next_hub: Hub = drone.path[1]
 
@@ -95,11 +129,23 @@ class Simulator:
 
     def get_next_connection(self, current_hub: Hub,
                             next_hub: Hub) -> Connection | None:
+        """
+        Finds the connection between the current and next hub.
+
+        Delegates the search to the graph and returns the corresponding
+        connection if the two hubs are directly connected.
+        """
         return self.class_graph.get_connection(current_hub, next_hub)
 
     def normal_move(self, drone: Drone, current_hub: Hub,
                     next_hub: Hub, connection: Connection) -> bool:
+        """
+        Moves a drone directly from one hub to another.
 
+        The drone is removed from its current hub and connection, then added
+        to the destination hub. Its current location is updated and the
+        movement is displayed in the simulation output.
+        """
         current_hub.drones.remove(drone)
         connection.leave(drone)
         next_hub.drones.append(drone)
@@ -114,7 +160,14 @@ class Simulator:
 
     def start_restricted_move(self, drone: Drone, current_hub: Hub,
                               next_hub: Hub, connection: Connection) -> bool:
+        """
+        Starts a multi-turn movement through a restricted hub.
 
+        The drone leaves its current hub and remains associated with the
+        connection while the movement is in progress. Its destination and
+        remaining movement time are stored so the movement can be completed
+        on a subsequent turn.
+        """
         current_hub.drones.remove(drone)
 
         drone.current_hub = None
@@ -130,6 +183,13 @@ class Simulator:
         return True
 
     def finish_restricted_move(self, drone: Drone) -> None:
+        """
+        Completes a drone's movement through a restricted hub.
+
+        The drone is removed from the connection and added to its destination
+        hub. Its temporary movement state is then cleared so it can continue
+        along its route on the next simulation turn.
+        """
         connection = drone.current_connection
 
         if connection is not None:

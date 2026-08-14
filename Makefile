@@ -1,5 +1,5 @@
 P3 = python3.12
-VENV = venv
+VENV = .venv
 PIP = $(VENV)/bin/pip
 P3_VENV = $(VENV)/bin/python3.12
 FLAKE8 = $(VENV)/bin/flake8

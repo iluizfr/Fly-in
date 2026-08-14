@@ -5,7 +5,22 @@ import pygame
 
 
 class Renderer:
+    """
+    Handles the graphical representation of the drone simulation.
+
+    The renderer uses Pygame to display hubs, connections, and drones on the
+    screen. It also manages the visual scale and sizes of the elements based
+    on the current simulation configuration.
+    """
+
     def __init__(self, simulator: Simulator) -> None:
+        """
+        Initializes the renderer with the given simulation.
+
+        The Pygame window is created and configured with the default display
+        settings. The renderer also starts in a running state, allowing the
+        application to process events and update the display.
+        """
         self.simulator = simulator
         self.scale = 100
         self.hub_size = 20
@@ -18,6 +33,13 @@ class Renderer:
         self.running = True
 
     def draw(self) -> None:
+        """
+        Draws the current state of the simulation on the screen.
+
+        The method renders the connections between hubs, the hubs themselves,
+        and all drones that are currently located at a hub. The display is
+        refreshed after all elements have been drawn.
+        """
         self.screen.fill((30, 30, 30))
 
         font = pygame.font.Font(None, 22)
@@ -66,12 +88,23 @@ class Renderer:
         pygame.display.flip()
 
     def update(self) -> None:
+        """
+        Processes Pygame events and updates the renderer state.
+
+        The renderer stops running when a window close event is received.
+        """
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 self.running = False
 
     @staticmethod
     def collor(collor: str) -> tuple[int, int, int]:
+        """
+        Converts a color name into an RGB color tuple.
+
+        The color name is normalized to lowercase before being converted.
+        The special "rainbow" value uses a predefined RGB color.
+        """
         collor = collor.lower()
 
         if collor == "rainbow":
@@ -83,6 +116,12 @@ class Renderer:
         return rgb
 
     def pos(self, hub: Hub) -> tuple[int, int]:
+        """
+        Calculates the screen position of a hub.
+
+        The hub's original coordinates are scaled and translated so that the
+        complete network is centered within the Pygame window.
+        """
         scale = self.scale
 
         min_x = min(
@@ -107,6 +146,12 @@ class Renderer:
         return x, y
 
     def set_sizes(self, scale: int, hub_size: int, drone_size: int) -> None:
+        """
+        Updates the visual dimensions used by the renderer.
+
+        The provided values control the map scale, hub size, and drone size
+        used when rendering the simulation.
+        """
         self.scale = scale
         self.hub_size = hub_size
         self.drone_size = drone_size
