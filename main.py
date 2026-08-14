@@ -22,15 +22,8 @@ def main() -> None:
         while renderer.running and simulator.drones:
             renderer.update()
             renderer.draw()
-            printed = simulator.simulate_turn()
-            clock.tick(1)
-
-            if printed:
-                print()
-
-            simulator.current_turn += 1
-
-        renderer.draw()
+            simulator.simulate_turn()
+            clock.tick(2)
 
         print(f"\nTurnos: {simulator.current_turn}")
         print("=" * 20)

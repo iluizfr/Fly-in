@@ -45,6 +45,9 @@ class Menu:
         n = int(input("\nmap: "))
         n -= 1
         mapa = filles[n]
+
+        if mapa == "02_the_fractured.txt":
+            self.scale = 20
         print()
 
         return f"maps/{dif}/{mapa}"

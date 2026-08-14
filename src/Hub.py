@@ -1,5 +1,5 @@
-from typing import Any
 from .Drone import Drone
+from typing import Any
 
 
 class HubError(Exception):
@@ -42,7 +42,7 @@ class Hub:
             key, value = data.split("=")
 
             if key not in keys:
-                raise HubError(f"Hub: Wrong key in {meta_data}")
+                raise HubError(f"Hub: Wrong key '{key}' in '{meta_data}'")
 
             if key == "max_drones":
                 new_meta_data[key] = int(value)

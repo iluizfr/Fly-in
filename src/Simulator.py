@@ -1,6 +1,6 @@
 from src.Connection import Connection
-from .Graph import Graph
 from .Drone import Drone
+from .Graph import Graph
 from .Hub import Hub
 
 
@@ -28,7 +28,7 @@ class Simulator:
     def __repr__(self) -> str:
         return "Simulator"
 
-    def simulate_turn(self) -> bool:
+    def simulate_turn(self) -> None:
         printed = False
 
         for drone in self.drones:
@@ -66,12 +66,10 @@ class Simulator:
             if self.move_drone(drone):
                 printed = True
 
-            # if drone in self.end_hub.drones:
-                # self.delivered_drones.append(drone)
-                # self.end_hub.drones.remove(drone)
-                # self.drones.remove(drone)
+        self.current_turn += 1
 
-        return printed
+        if printed:
+            print()
 
     def move_drone(self, drone: Drone) -> bool:
         current_hub: Hub = drone.path[0]

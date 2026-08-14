@@ -1,7 +1,7 @@
 from .Simulator import Simulator
-import pygame
-import webcolors
 from .Hub import Hub
+import webcolors
+import pygame
 
 
 class Renderer:
@@ -35,20 +35,6 @@ class Renderer:
                 (x1, y1), (x2, y2),
                 4
                 )
-
-            for drone in connection.drones:
-
-                x = x1 - x2
-                y = y1 - y2
-
-                pygame.draw.circle(self.screen,
-                                   (255, 0, 0), (x, y),
-                                   self.drone_size
-                                   )
-
-                text = font.render(drone.id, True, self.collor("black"))
-                text_rec = text.get_rect(center=(x, y))
-                self.screen.blit(text, text_rec)
 
         # Draw the Hubs
         for hub in self.simulator.class_graph.hub_by_name.values():

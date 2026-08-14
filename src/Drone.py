@@ -1,6 +1,7 @@
 from typing import TYPE_CHECKING
 
 
+# Just to pass mypy errors
 if TYPE_CHECKING:
     from .Hub import Hub
     from .Connection import Connection

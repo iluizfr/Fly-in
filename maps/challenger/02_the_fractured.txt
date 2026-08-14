@@ -1,0 +1,338 @@
+# CHALLENGER LEVEL: THE FRACTURED LABYRINTH v3
+# 25 drones / unique coordinates / unique hub names
+# No duplicated hubs, coordinates or undirected connections.
+
+nb_drones: 25
+
+# ============================================================
+# LAYER 0 — THE THREE GATES
+# ============================================================
+
+start_hub: origin 0 0 [color=green max_drones=25]
+
+hub: crimson_north 2 3 [color=red max_drones=2]
+hub: crimson_core 2 0 [color=red max_drones=1]
+hub: crimson_south 2 -3 [color=red max_drones=2]
+
+hub: iron_north 4 3 [color=crimson max_drones=1]
+hub: iron_core 4 0 [color=crimson max_drones=1]
+hub: iron_south 4 -3 [color=crimson max_drones=1]
+
+
+# ============================================================
+# LAYER 1 — THE BROKEN MAZE
+# ============================================================
+
+hub: violet_n1 5 5 [color=purple]
+hub: violet_n2 7 5 [color=purple]
+hub: violet_n3 9 5 [color=purple]
+hub: northern_void 11 5 [color=black]
+
+hub: violet_c1 5 2 [color=purple]
+hub: violet_c2 7 2 [color=purple]
+hub: violet_c3 9 2 [color=purple]
+hub: central_void 11 2 [color=black]
+
+hub: violet_s1 5 -5 [color=purple]
+hub: violet_s2 7 -5 [color=purple]
+hub: violet_s3 9 -5 [color=purple]
+hub: southern_void 11 -5 [color=black]
+
+hub: brown_west 6 6 [zone=restricted color=brown max_drones=2]
+hub: brown_peak 8 7 [zone=restricted color=brown max_drones=2]
+hub: brown_east 10 6 [zone=restricted color=brown max_drones=1]
+hub: brown_floor 8 -7 [zone=restricted color=brown max_drones=2]
+hub: brown_western_floor 6 -6 [zone=restricted color=brown max_drones=2]
+
+
+# ============================================================
+# LAYER 2 — CAPACITY COLLAPSE
+# ============================================================
+
+hub: orange_north 13 4 [color=orange max_drones=1]
+hub: orange_mid 13 0 [color=orange max_drones=1]
+hub: orange_south 13 -4 [color=orange max_drones=1]
+
+hub: maroon_alpha 15 5 [zone=restricted color=maroon max_drones=2]
+hub: maroon_beta 17 5 [zone=restricted color=maroon max_drones=2]
+
+hub: maroon_gamma 15 1 [zone=restricted color=maroon max_drones=2]
+hub: maroon_delta 17 1 [zone=restricted color=maroon max_drones=2]
+
+hub: maroon_epsilon 15 -5 [zone=restricted color=maroon max_drones=2]
+hub: maroon_zeta 17 -5 [zone=restricted color=maroon max_drones=2]
+
+
+# ============================================================
+# LAYER 3 — FALSE PRIORITY
+# ============================================================
+
+hub: golden_north 19 4 [zone=priority color=gold max_drones=3]
+hub: golden_center 19 0 [zone=priority color=gold max_drones=2]
+hub: golden_south 19 -4 [zone=priority color=gold max_drones=3]
+
+hub: amber_n1 21 6 [zone=priority color=gold]
+hub: amber_n2 23 6 [zone=priority color=gold]
+hub: northern_blackhole 25 6 [color=black]
+
+hub: amber_c1 21 2 [zone=priority color=gold]
+hub: amber_c2 23 2 [zone=priority color=gold]
+hub: central_blackhole 25 2 [color=black]
+
+hub: amber_s1 21 -6 [zone=priority color=gold]
+hub: amber_s2 23 -6 [zone=priority color=gold]
+hub: southern_blackhole 25 -6 [color=black]
+
+
+# ============================================================
+# LAYER 4 — FOUR-WAY CONVERGENCE
+# ============================================================
+
+hub: dark_north_a 27 5 [zone=restricted color=darkred max_drones=1]
+hub: dark_north_b 29 5 [zone=restricted color=darkred max_drones=1]
+
+hub: dark_upper_a 27 2 [zone=restricted color=darkred max_drones=1]
+hub: dark_upper_b 29 2 [zone=restricted color=darkred max_drones=1]
+
+hub: dark_lower_a 27 -2 [zone=restricted color=darkred max_drones=1]
+hub: dark_lower_b 29 -2 [zone=restricted color=darkred max_drones=1]
+
+hub: dark_south_a 27 -5 [zone=restricted color=darkred max_drones=1]
+hub: dark_south_b 29 -5 [zone=restricted color=darkred max_drones=1]
+
+hub: violet_upper_merge 31 3 [color=violet max_drones=3]
+hub: violet_lower_merge 31 -3 [color=violet max_drones=3]
+
+
+# ============================================================
+# LAYER 5 — FINAL FUNNEL
+# ============================================================
+
+hub: crimson_final_north 33 3 [color=crimson max_drones=2]
+hub: crimson_final_center 33 0 [color=crimson max_drones=1]
+hub: crimson_final_south 33 -3 [color=crimson max_drones=2]
+
+hub: final_lock_upper 35 2 [color=crimson max_drones=1]
+hub: final_lock_lower 35 -2 [color=crimson max_drones=1]
+
+hub: final_throat_a 37 0 [color=crimson max_drones=1]
+hub: final_throat_b 39 0 [color=crimson max_drones=1]
+hub: final_throat_c 41 0 [color=crimson max_drones=1]
+
+end_hub: fractured_objective 44 0 [color=rainbow max_drones=25]
+
+
+# ============================================================
+# CONNECTIONS
+# IMPORTANT:
+# Every connection is unique as an UNDIRECTED pair.
+# A-B and B-A are never both present.
+# ============================================================
+
+
+# ------------------------------------------------------------
+# LAYER 0
+# ------------------------------------------------------------
+
+connection: origin-crimson_north [max_link_capacity=2]
+connection: origin-crimson_core [max_link_capacity=1]
+connection: origin-crimson_south [max_link_capacity=2]
+
+connection: crimson_north-iron_north [max_link_capacity=1]
+connection: crimson_core-iron_core [max_link_capacity=1]
+connection: crimson_south-iron_south [max_link_capacity=1]
+
+
+# ------------------------------------------------------------
+# NORTHERN MAZE
+# ------------------------------------------------------------
+
+connection: iron_north-violet_n1
+connection: violet_n1-violet_n2
+connection: violet_n2-violet_n3
+connection: violet_n3-northern_void
+
+connection: violet_n1-brown_west
+connection: brown_west-brown_peak
+connection: brown_peak-brown_east
+
+
+# ------------------------------------------------------------
+# CENTRAL MAZE
+# ------------------------------------------------------------
+
+connection: iron_core-violet_c1
+connection: violet_c1-violet_c2
+connection: violet_c2-violet_c3
+connection: violet_c3-central_void
+
+connection: violet_c2-brown_peak
+
+
+# ------------------------------------------------------------
+# SOUTHERN MAZE
+# ------------------------------------------------------------
+
+connection: iron_south-violet_s1
+connection: violet_s1-violet_s2
+connection: violet_s2-violet_s3
+connection: violet_s3-southern_void
+
+connection: violet_s1-brown_western_floor
+connection: brown_western_floor-brown_floor
+
+
+# ------------------------------------------------------------
+# RESTRICTED CROSS-CONNECTIONS
+# ------------------------------------------------------------
+
+connection: brown_east-orange_north
+connection: brown_floor-orange_south
+connection: brown_peak-orange_mid
+
+
+# ------------------------------------------------------------
+# LIMITED ESCAPE ROUTES
+# ------------------------------------------------------------
+
+connection: violet_n2-orange_north
+connection: violet_c2-orange_mid
+connection: violet_s2-orange_south
+connection: violet_c3-orange_mid
+
+
+# ------------------------------------------------------------
+# CAPACITY COLLAPSE
+# ------------------------------------------------------------
+
+connection: orange_north-orange_mid [max_link_capacity=1]
+connection: orange_mid-orange_south [max_link_capacity=1]
+
+connection: orange_north-maroon_alpha
+connection: orange_mid-maroon_gamma
+connection: orange_south-maroon_epsilon
+
+connection: maroon_alpha-maroon_beta
+connection: maroon_gamma-maroon_delta
+connection: maroon_epsilon-maroon_zeta
+
+connection: maroon_beta-maroon_delta
+connection: maroon_delta-maroon_zeta
+
+
+# ------------------------------------------------------------
+# FALSE PRIORITY
+# ------------------------------------------------------------
+
+connection: orange_north-golden_north
+connection: orange_mid-golden_center
+connection: orange_south-golden_south
+
+connection: maroon_beta-golden_north
+connection: maroon_delta-golden_center
+connection: maroon_zeta-golden_south
+
+
+# ------------------------------------------------------------
+# NORTHERN PRIORITY TRAP
+# ------------------------------------------------------------
+
+connection: golden_north-amber_n1
+connection: amber_n1-amber_n2
+connection: amber_n2-northern_blackhole
+
+
+# ------------------------------------------------------------
+# CENTRAL PRIORITY TRAP
+# ------------------------------------------------------------
+
+connection: golden_center-amber_c1
+connection: amber_c1-amber_c2
+connection: amber_c2-central_blackhole
+
+
+# ------------------------------------------------------------
+# SOUTHERN PRIORITY TRAP
+# ------------------------------------------------------------
+
+connection: golden_south-amber_s1
+connection: amber_s1-amber_s2
+connection: amber_s2-southern_blackhole
+
+
+# ------------------------------------------------------------
+# CONVERGENCE ENTRY
+# ------------------------------------------------------------
+
+connection: golden_north-dark_north_a
+connection: golden_north-dark_upper_a
+
+connection: golden_center-dark_upper_a
+connection: golden_center-dark_lower_a
+
+connection: golden_south-dark_lower_a
+connection: golden_south-dark_south_a
+
+
+# ------------------------------------------------------------
+# RESTRICTED LANES
+# ------------------------------------------------------------
+
+connection: dark_north_a-dark_north_b
+connection: dark_north_b-violet_upper_merge
+
+connection: dark_upper_a-dark_upper_b
+connection: dark_upper_b-violet_upper_merge
+
+connection: dark_lower_a-dark_lower_b
+connection: dark_lower_b-violet_lower_merge
+
+connection: dark_south_a-dark_south_b
+connection: dark_south_b-violet_lower_merge
+
+
+# ------------------------------------------------------------
+# CROSS-LANE NETWORK
+# ------------------------------------------------------------
+
+connection: dark_north_a-dark_upper_a
+connection: dark_upper_a-dark_lower_a
+connection: dark_lower_a-dark_south_a
+
+
+# ------------------------------------------------------------
+# EMERGENCY BYPASSES
+# ------------------------------------------------------------
+
+connection: maroon_alpha-dark_north_a
+connection: maroon_epsilon-dark_south_a
+
+connection: amber_n1-dark_upper_a
+connection: amber_s1-dark_lower_a
+
+connection: maroon_delta-violet_upper_merge
+connection: maroon_gamma-violet_lower_merge
+
+
+# ------------------------------------------------------------
+# FINAL FUNNEL
+# ------------------------------------------------------------
+
+connection: violet_upper_merge-crimson_final_north
+connection: violet_upper_merge-crimson_final_center
+
+connection: violet_lower_merge-crimson_final_center
+connection: violet_lower_merge-crimson_final_south
+
+connection: crimson_final_north-final_lock_upper
+connection: crimson_final_center-final_lock_upper
+connection: crimson_final_center-final_lock_lower
+connection: crimson_final_south-final_lock_lower
+
+connection: final_lock_upper-final_throat_a [max_link_capacity=1]
+connection: final_lock_lower-final_throat_a [max_link_capacity=1]
+
+connection: final_throat_a-final_throat_b [max_link_capacity=1]
+connection: final_throat_b-final_throat_c [max_link_capacity=1]
+
+connection: final_throat_c-fractured_objective
