@@ -29,7 +29,6 @@ class Renderer:
         pygame.init()
         self.screen = pygame.display.set_mode((1000, 700))
         pygame.display.set_caption("Fly-in")
-
         self.running = True
 
     def draw(self) -> None:
@@ -41,7 +40,6 @@ class Renderer:
         refreshed after all elements have been drawn.
         """
         self.screen.fill((30, 30, 30))
-
         font = pygame.font.Font(None, 22)
 
         # Draw the lines between the hubs
@@ -57,6 +55,20 @@ class Renderer:
                 (x1, y1), (x2, y2),
                 4
                 )
+
+            # Draw drones in connections
+            for drone in connection.drones:
+                x = x1 + (x2 - x1) // 2
+                y = y1 + (y2 - y1) // 2
+
+                pygame.draw.circle(self.screen,
+                                   (255, 0, 0), (x, y),
+                                   self.drone_size
+                                   )
+
+                text = font.render(drone.id, True, self.collor("black"))
+                text_rec = text.get_rect(center=(x, y))
+                self.screen.blit(text, text_rec)
 
         # Draw the Hubs
         for hub in self.simulator.class_graph.hub_by_name.values():

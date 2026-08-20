@@ -23,14 +23,14 @@ def main() -> None:
             renderer.update()
             renderer.draw()
             simulator.simulate_turn()
-            clock.tick(2)
+            clock.tick(1)
 
         print(f"\nTurnos: {simulator.current_turn}")
         print("=" * 20)
 
     except (ParserError, ValueError, HubError, ConectionError,
-            PermissionError, FileNotFoundError) as error:
-        print(error)
+            PermissionError, FileNotFoundError, IndexError) as error:
+        print(f"\n{error}\n")
         sys.exit(1)
 
 

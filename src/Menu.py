@@ -39,36 +39,43 @@ class Menu:
         print("easy\nmedium\nhard\nchallenger")
         dif = input("\nchoice: ")
 
-        if dif == "easy":
-            self.scale = 120
-            self.drone_size = 13
+        match dif:
+            case "easy":
+                self.scale = 120
+                self.drone_size = 13
 
-        elif dif == "hard":
-            self.scale = 70
-            self.drone_size = 13
+            case "medium":
+                self.scale = 120
+                self.drone_size = 13
 
-        elif dif == "medium":
-            self.scale = 120
-            self.drone_size = 13
+            case "hard":
+                self.scale = 70
+                self.drone_size = 13
 
-        elif dif == "challenger":
-            self.scale = 40
-            self.drone_size = 4
-            self.hub_size = 11
+            case "challenger":
+                self.scale = 40
+                self.drone_size = 6
+                self.hub_size = 12
+
+            case _:
+                raise ValueError(f"'{dif}' not a valid difficult")
 
         filles = os.listdir(f"maps/{dif}")
         print("\nChoose the map:")
 
-        i = 1
+        i = 0
         for map in filles:
             print(f"{i}: {map}")
             i += 1
         n = int(input("\nmap: "))
-        n -= 1
-        mapa = filles[n]
+        try:
+            mapa = filles[n]
+        except IndexError:
+            raise IndexError(f"map nº '{n}' not a option")
 
         if mapa == "02_the_fractured.txt":
             self.scale = 20
+
         print()
 
         return f"maps/{dif}/{mapa}"
