@@ -27,7 +27,12 @@ class Renderer:
         self.drone_size = 8
 
         pygame.init()
-        self.screen = pygame.display.set_mode((1000, 700))
+        info = pygame.display.Info()
+
+        self.width = (info.current_w // 1.5)
+        self.height = (info.current_h // 1.5)
+
+        self.screen = pygame.display.set_mode((self.width, self.height))
         pygame.display.set_caption("Fly-in")
         self.running = True
 

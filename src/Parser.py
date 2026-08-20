@@ -13,7 +13,7 @@ class Processor(ABC):
     """
 
     @abstractmethod
-    def converter(self, value: str) -> Any:
+    def converter(self, value: str, line: int) -> Any:
         """
         Converts a string value into the expected data type or structure.
         """
@@ -28,25 +28,19 @@ class NumericProcessor(Processor):
     an error when the resulting value is not greater than zero.
     """
 
-    def converter(self, value: str) -> int:
+    def converter(self, value: str, line: int) -> int:
         """
         Converts a string value into a positive integer.
 
         The value is validated before being returned.
         """
-        return self.validate(value)
+        try:
+            new_value = int(value)
+        except ValueError as erro:
+            raise ParserError(f"line: {line}, {erro}")
 
-    @staticmethod
-    def validate(value: str) -> int:
-        """
-        Validates and converts a string value into a positive integer.
-
-        Raises an error if the value cannot be converted to an integer or
-        if the resulting number is less than or equal to zero.
-        """
-        new_value = int(value)
         if new_value <= 0:
-            raise ValueError("Parsing: nb_drones must be bigger than 0")
+            raise ValueError(f"nb_drones must be bigger than 0, line: {line}")
         return new_value
 
 
@@ -58,7 +52,7 @@ class HubProcessor(Processor):
     and optional metadata into a dictionary.
     """
 
-    def converter(self, value: str) -> Any:
+    def converter(self, value: str, line: int) -> Any:
         """
         Parses a hub configuration string into a dictionary.
 
@@ -73,7 +67,7 @@ class HubProcessor(Processor):
             n = n
         except Exception:
             raise ParserError(
-                "Hubprocessor: ' ' not allowed in names of hub's")
+                f"' ' not allowed in names of hub's, line: {line}")
 
         name = pre_check[0]
         x = pre_check[1]
@@ -99,7 +93,7 @@ class ConnectionProcessor(Processor):
     the connected hubs along with any optional metadata.
     """
 
-    def converter(self, value: str) -> dict[str, Any]:
+    def converter(self, value: str, line: int) -> dict[str, Any]:
         """
         Parses a connection configuration string into a dictionary.
 
@@ -109,7 +103,7 @@ class ConnectionProcessor(Processor):
         connection: dict[str, Any] = {}
 
         if "-" not in value:
-            raise ValueError(f"Missing '-' in connection: {value}")
+            raise ValueError(f"Missing '-' in connection, line: {line}")
 
         word_count = len(value.split())
 
@@ -233,8 +227,8 @@ class Parser:
                         or self.end_hub is not None \
                             or len(self.connections) != 0:
                         raise ParserError(
-                            "Parser: nb_drones not in first valid line")
-                    config = valid_keys[key].converter(value)
+                            f"line: {self.ln}, nb_drones not in first line")
+                    config = valid_keys[key].converter(value, self.ln)
                     self.nb_drones = config
 
                 # Start Hub
@@ -243,7 +237,7 @@ class Parser:
                         raise ParserError(
                             f"Duplicate start_hub in line {self.ln}")
                     else:
-                        config = valid_keys[key].converter(value)
+                        config = valid_keys[key].converter(value, self.ln)
 
                         if config["name"] in stack_names:
                             raise ParserError(
@@ -264,7 +258,7 @@ class Parser:
 
                 # Hub
                 elif key == "hub":
-                    config = valid_keys[key].converter(value)
+                    config = valid_keys[key].converter(value, self.ln)
 
                     if config["name"] in stack_names:
                         raise ParserError(
@@ -288,7 +282,7 @@ class Parser:
                         raise ParserError(
                             f"Duplicate end_hub in line {self.ln}")
                     else:
-                        config = valid_keys[key].converter(value)
+                        config = valid_keys[key].converter(value, self.ln)
 
                         if config["name"] in stack_names:
                             raise ParserError(
@@ -307,7 +301,7 @@ class Parser:
 
                 # Connection
                 elif key == "connection":
-                    config = valid_keys[key].converter(value)
+                    config = valid_keys[key].converter(value, self.ln)
 
                     if "meta_data" in config:
                         self.connections.append(

@@ -53,9 +53,9 @@ class Menu:
                 self.drone_size = 13
 
             case "challenger":
-                self.scale = 40
-                self.drone_size = 6
-                self.hub_size = 12
+                self.scale = 80
+                self.drone_size = 12
+                self.hub_size = 24
 
             case _:
                 raise ValueError(f"'{dif}' not a valid difficult")

@@ -1,7 +1,7 @@
-P3 = python3.12
-VENV = .venv
+P3 = python3.10
+VENV = venv
 PIP = $(VENV)/bin/pip
-P3_VENV = $(VENV)/bin/python3.12
+P3_VENV = $(VENV)/bin/python3.10
 FLAKE8 = $(VENV)/bin/flake8
 MYPY = $(VENV)/bin/mypy
 RM = rm -rf
