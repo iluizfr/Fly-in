@@ -22,7 +22,7 @@ class Hub:
     """
 
     def __init__(self, name: str, pos: tuple[int, int],
-                 meta_data: str) -> None:
+                 meta_data: str, line: int) -> None:
         """
         Initializes a hub with its name, position, and optional metadata.
 
@@ -31,6 +31,7 @@ class Hub:
         """
         self.name: str = name
         self.pos: tuple[int, int] = pos
+        self.line: int = line
         self.meta_data: dict[str, Any] = self.__check_meta_data(meta_data)
         self.drones: list[Drone] = []
         self.type: str = self.meta_data["zone"]
@@ -60,9 +61,14 @@ class Hub:
         new_meta_data["zone"] = "normal"
         new_meta_data["color"] = None
         new_meta_data["max_drones"] = 1
+        ln = self.line
 
         if not meta_data or not meta_data.strip():
             return new_meta_data
+
+        if not meta_data.startswith("[") or not meta_data.endswith("]"):
+            raise HubError(
+                f"line: {ln}, meta data must start and end with '[]'.")
 
         meta_data = meta_data.strip("[")
         meta_data = meta_data.strip("]")
@@ -70,21 +76,29 @@ class Hub:
 
         for data in datas:
             if "=" not in data:
-                raise HubError(f"Hub: wrong format in meta data: {data}")
+                raise HubError(
+                    f"line: {ln}, wrong format in '{data}', missing '='.")
+
             key, value = data.split("=")
 
             if key not in keys:
-                raise HubError(f"Hub: Wrong key '{key}' in '{meta_data}'")
+                raise HubError(
+                    f"line: {ln}, wrong key '{key}' in meta data.")
 
             if key == "max_drones":
-                new_meta_data[key] = int(value)
+                try:
+                    new_meta_data[key] = int(value)
+                except ValueError:
+                    raise HubError(
+                        f"line: {ln}, '{value}' not valid for '{key}'.")
 
                 if new_meta_data[key] < 0:
-                    raise HubError(f"Values for '{key}' must be positive")
+                    raise HubError(
+                        f"line: {ln}, no negative values for '{key}'.")
 
             elif key == "color" or key == "zone":
                 if key == "zone" and value not in valid_zones:
-                    raise HubError(f"Unknow zone type: {value}")
+                    raise HubError(f"line: {ln}, unknow zone type '{value}'.")
 
                 new_meta_data[key] = value.strip()
 

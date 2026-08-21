@@ -53,12 +53,12 @@ class Menu:
                 self.drone_size = 13
 
             case "challenger":
-                self.scale = 80
+                self.scale = 50
                 self.drone_size = 12
-                self.hub_size = 24
+                self.hub_size = 18
 
             case _:
-                raise ValueError(f"'{dif}' not a valid difficult")
+                raise ValueError(f"'{dif}' not a valid difficult.")
 
         filles = os.listdir(f"maps/{dif}")
         print("\nChoose the map:")
@@ -67,11 +67,16 @@ class Menu:
         for map in filles:
             print(f"{i}: {map}")
             i += 1
-        n = int(input("\nmap: "))
+
+        try:
+            n = int(input("\nmap: "))
+        except ValueError:
+            raise ValueError("Invalid choice, map must be a number.")
+
         try:
             mapa = filles[n]
         except IndexError:
-            raise IndexError(f"map nº '{n}' not a option")
+            raise IndexError(f"map nº '{n}' not an option.")
 
         if mapa == "02_the_fractured.txt":
             self.scale = 20

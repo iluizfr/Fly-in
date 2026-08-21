@@ -33,6 +33,10 @@ def main() -> None:
         print(f"\n{error}\n")
         sys.exit(1)
 
+    except KeyboardInterrupt:
+        print("\nEnding the program..\n")
+        sys.exit(2)
+
 
 if __name__ == "__main__":
     main()

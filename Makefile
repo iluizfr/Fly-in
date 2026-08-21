@@ -1,7 +1,7 @@
-P3 = python3.10
+P3 = python3.12
 VENV = venv
 PIP = $(VENV)/bin/pip
-P3_VENV = $(VENV)/bin/python3.10
+P3_VENV = $(VENV)/bin/python3.12
 FLAKE8 = $(VENV)/bin/flake8
 MYPY = $(VENV)/bin/mypy
 RM = rm -rf
@@ -30,6 +30,7 @@ clean:
 
 fclean:
 	$(RM) $(VENV)
+	clear
 
 re:
 	fclean install run

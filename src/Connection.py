@@ -21,7 +21,7 @@ class Connection:
     available space and to manage drones entering or leaving the connection.
     """
 
-    def __init__(self, connection: tuple[Any, Any],
+    def __init__(self, connection: tuple[Any, Any], line: int,
                  meta_data: Optional[str] = None) -> None:
         """
         Initializes a connection between two hubs.
@@ -31,6 +31,7 @@ class Connection:
         maximum drone capacity.
         """
         self.connection: tuple[Any, Any] = connection
+        self.line = line
         self.meta_data: dict[str, Any] = self.__check_meta_data(meta_data)
         self.max_capacity = self.meta_data["max_link_capacity"]
         self.drones: list[Drone] = []
@@ -68,9 +69,14 @@ class Connection:
         new_meta_data: dict[str, Any] = {}
 
         new_meta_data["max_link_capacity"] = 1
+        ln = self.line
 
         if not meta_data or not meta_data.strip():
             return new_meta_data
+
+        if not meta_data.startswith("[") or not meta_data.endswith("]"):
+            raise ConectionError(
+                f"line: {ln}, meta data must start and end with '[]'.")
 
         meta_data = meta_data.strip("[")
         meta_data = meta_data.strip("]")
@@ -81,13 +87,14 @@ class Connection:
             key, value = data.split("=")
 
             if key not in keys:
-                raise ConectionError(f"Connection: Unknow key in {meta_data}")
+                raise ConectionError(
+                    f"line: {ln}, unknow key in {meta_data}.")
 
             if key == "max_link_capacity":
                 new_meta_data[key] = int(value)
                 if new_meta_data[key] < 0:
                     raise ConectionError(
-                        f"Values for '{key}' must be positive'")
+                        f"line: {ln}, values for '{key}' must be positive'")
 
         return new_meta_data
 
